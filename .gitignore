@@ -5,3 +5,6 @@ input/*.txt
 
 # Rust build target
 target
+
+# CLI executable
+aoc
