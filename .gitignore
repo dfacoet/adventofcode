@@ -1,5 +1,7 @@
 # Inputs are private
 input/*.txt
 
+.token
+
 # Rust build target
 target
