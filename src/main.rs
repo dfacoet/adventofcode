@@ -31,6 +31,10 @@ enum Commands {
         #[arg(long)]
         all: bool,
     },
+    /// Run puzzle solutions
+    Run {},
+    /// Start an AoC day (get input, create template)
+    Start {},
 }
 
 fn main() {
@@ -71,7 +75,9 @@ fn main() {
                 }
             }
         }
-        _ => println!("Must specify either year and day, or --all"),
+        Commands::Get { .. } => println!("Must specify either year and day, or --all"),
+        Commands::Run { .. } => println!("run not implemented yet"),
+        Commands::Start { .. } => println!("start not implemented yet"),
     }
 }
 
