@@ -38,7 +38,8 @@ enum Commands {
     /// Run puzzle solutions
     Run {},
     /// Start an AoC day (get input, create template)
-    Start {},
+    // TODO: use different parameters, enable multiple languages
+    Start(DayParams),
     /// Test the solutions
     Test(DayParams),
 }
@@ -49,7 +50,7 @@ fn main() {
     match &cli.command {
         Commands::Get(params) => get(params),
         Commands::Run {} => panic!("Run not implemented"),
-        Commands::Start {} => panic!("Start not implemented"),
+        Commands::Start(params) => start(params).unwrap(),
         Commands::Test(params) => test(params),
     }
 }
@@ -282,4 +283,95 @@ fn parse_answers_page(page: String) -> Result<String, ()> {
     } else {
         Ok(answers)
     }
+}
+
+fn start(params: &DayParams) -> Result<(), Box<dyn std::error::Error>> {
+    match params {
+        DayParams {
+            year: Some(year),
+            day: Some(day),
+            today: false,
+            all: false,
+        } => create_template(year, day),
+        DayParams {
+            year: None,
+            day: None,
+            today: true,
+            all: false,
+        } => {
+            if let Some((year, day)) = get_today_nyc() {
+                create_template(&year, &day)
+            } else {
+                Err("Today is not an advent day".into())
+            }
+        }
+        _ => Err("Invalid parameters for start".into()),
+    }
+}
+
+const RUST_TEMPLATE: &str = "pub fn part1(input: String) -> String {
+    // Solve part 1
+    String::new()
+}
+
+pub fn part2(input: String) -> String {
+    // Solve part 2
+    String::new()
+}
+";
+
+fn day_cargo_template(year: &i32, day: &u32) -> String {
+    let name = format!("y{year}d{:02}", day);
+    format!(
+        "[package]
+name = \"{name}\"
+version = \"0.1.0\"
+edition = \"2021\"
+
+[lib]
+path = \"{name}.rs\"
+
+[dependencies]
+aoc = \"*\"
+"
+    )
+}
+
+fn create_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
+    write_input_file(year, day); // TODO: check silently
+
+    // create daily project directory and template source and Cargo.toml files
+    let new_project_path_str = format!("rust/y{year}/d{:02}", day);
+    let new_project_path = std::path::Path::new(&new_project_path_str);
+    fs::create_dir_all(new_project_path)?;
+
+    let solution_path = new_project_path.join(format!("y{year}d{:02}.rs", day));
+    match fs::File::create_new(&solution_path) {
+        Ok(mut file) => file.write_all(RUST_TEMPLATE.as_bytes()).unwrap(),
+        Err(e) => return Err(Box::new(e)),
+    }
+    let day_toml_path = new_project_path.join("Cargo.toml");
+    match fs::File::create_new(&day_toml_path) {
+        Ok(mut file) => file
+            .write_all(day_cargo_template(year, day).as_bytes())
+            .unwrap(),
+        Err(e) => return Err(Box::new(e)),
+    }
+
+    // update global Cargo.toml
+    let cargo_toml_content = fs::read_to_string("./Cargo.toml")?;
+    let mut doc: toml_edit::DocumentMut = cargo_toml_content.parse()?;
+    let members = doc["workspace"]["members"].as_array_mut().unwrap();
+
+    if !members
+        .iter()
+        .any(|m| m.as_str() == Some(&new_project_path_str))
+    {
+        members.push(new_project_path_str.as_str());
+    }
+    members.sort_by(|a, b| a.as_str().unwrap().cmp(b.as_str().unwrap()));
+
+    fs::write("Cargo.toml", doc.to_string())?;
+
+    Ok(())
 }

@@ -1,3 +1,6 @@
+[workspace]
+members = ["rust/y2015/d01"]
+
 [package]
 name = "aoc"
 version = "0.1.0"
@@ -9,3 +12,4 @@ chrono-tz = "0.10.0"
 clap = { version = "4.5.20", features = ["derive"] }
 regex = "1.11.1"
 reqwest = { version = "0.12.9", features = ["blocking"] }
+toml_edit = "0.22.22"
