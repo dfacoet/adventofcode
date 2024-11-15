@@ -1,5 +1,5 @@
-pub fn part1(input: String) -> String {
-    input
+pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
+    Ok(input
         .chars()
         .map(|p| match p {
             '(' => 1,
@@ -7,10 +7,10 @@ pub fn part1(input: String) -> String {
             _ => 0,
         })
         .sum::<i64>()
-        .to_string()
+        .to_string())
 }
 
-pub fn part2(input: String) -> String {
+pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let mut floor = 0;
     for (k, p) in input.chars().enumerate() {
         match p {
@@ -19,8 +19,8 @@ pub fn part2(input: String) -> String {
             _ => panic!("!"),
         }
         if floor < 0 {
-            return (k + 1).to_string();
+            return Ok((k + 1).to_string());
         }
     }
-    panic!("-1 not found")
+    Err("No solution found".into())
 }

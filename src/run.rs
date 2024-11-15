@@ -26,7 +26,7 @@ pub fn run(params: &DayParams) -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-type SolutionFn = fn(String) -> String;
+type SolutionFn = fn(String) -> Result<String, Box<dyn std::error::Error>>;
 
 fn run_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
     let input = fs::read_to_string(format!("input/y{year}d{:02}.txt", day))?;
@@ -40,9 +40,9 @@ fn run_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>>
         _ => panic!("Solution not found"),
     };
 
-    let sol1 = part1(input.clone());
+    let sol1 = part1(input.clone())?;
     println!("Part 1: {sol1}");
-    let sol2 = part2(input.clone());
+    let sol2 = part2(input.clone())?;
     println!("Part 2: {sol2}");
     Ok(())
 }

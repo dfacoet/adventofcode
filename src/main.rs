@@ -310,14 +310,15 @@ fn start(params: &DayParams) -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-const RUST_TEMPLATE: &str = "pub fn part1(input: String) -> String {
+const RUST_TEMPLATE: &str =
+    "pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     // Solve part 1
-    String::new()
+    Err(\"Solution not implemented\".into())
 }
 
-pub fn part2(input: String) -> String {
+pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     // Solve part 2
-    String::new()
+    Err(\"Solution not implemented\".into())
 }
 ";
 
