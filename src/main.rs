@@ -4,7 +4,9 @@ use chrono::{Datelike, Utc};
 use chrono_tz::America::New_York;
 use clap::{Parser, Subcommand};
 use regex::Regex;
+
 mod run;
+mod templates;
 
 const MIN_YEAR: i32 = 2015;
 const MAX_YEAR: i32 = 2023; // TODO: determine from date
@@ -310,35 +312,6 @@ fn start(params: &DayParams) -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-const RUST_TEMPLATE: &str =
-    "pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
-    // Solve part 1
-    Err(\"Solution not implemented\".into())
-}
-
-pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
-    // Solve part 2
-    Err(\"Solution not implemented\".into())
-}
-";
-
-fn day_cargo_template(year: &i32, day: &u32) -> String {
-    let name = format!("y{year}d{:02}", day);
-    format!(
-        "[package]
-name = \"{name}\"
-version = \"0.1.0\"
-edition = \"2021\"
-
-[lib]
-path = \"{name}.rs\"
-
-[dependencies]
-aoc = \"*\"
-"
-    )
-}
-
 fn create_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
     write_input_file(year, day); // TODO: check silently
 
@@ -349,13 +322,13 @@ fn create_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Erro
 
     let solution_path = new_project_path.join(format!("y{year}d{:02}.rs", day));
     match fs::File::create_new(&solution_path) {
-        Ok(mut file) => file.write_all(RUST_TEMPLATE.as_bytes()).unwrap(),
+        Ok(mut file) => file.write_all(templates::RUST_TEMPLATE.as_bytes()).unwrap(),
         Err(e) => return Err(Box::new(e)),
     }
     let day_toml_path = new_project_path.join("Cargo.toml");
     match fs::File::create_new(&day_toml_path) {
         Ok(mut file) => file
-            .write_all(day_cargo_template(year, day).as_bytes())
+            .write_all(templates::day_cargo_template(year, day).as_bytes())
             .unwrap(),
         Err(e) => return Err(Box::new(e)),
     }
