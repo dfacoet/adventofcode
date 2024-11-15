@@ -28,4 +28,18 @@ For full instructions,
 ```
 
 ## Solutions
-TODO
+### Rust
+Each solution is a crate library located at `rust/y<YEAR>/d<DAY>`. Use
+
+```bash
+./aoc start [YEAR] [DAY]
+```
+to generate a template. This also downloads the puzzle input if necessary, and updates the global Cargo.toml to integrate the solution.
+
+Note: the match statement in `run::get_solution_functions` needs to be updated manually (TODO: automate). After that, run a solution with
+
+```bash
+./aoc run [YEAR] [DAY]
+```
+
+This will load the input, run the solution functions, and print the answers.
