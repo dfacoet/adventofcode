@@ -1,0 +1,10 @@
+[package]
+name = "y2023d04"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "y2023d04.rs"
+
+[dependencies]
+aoc = "*"

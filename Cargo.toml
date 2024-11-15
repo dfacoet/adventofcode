@@ -1,5 +1,5 @@
 [workspace]
-members = ["rust/y2015/d01", "rust/y2020/d01"]
+members = ["rust/y2015/d01", "rust/y2020/d01", "rust/y2023/d04"]
 
 [package]
 name = "aoc"
@@ -16,3 +16,4 @@ reqwest = { version = "0.12.9", features = ["blocking"] }
 toml_edit = "0.22.22"
 y2015d01 = { path = "rust/y2015/d01" }
 y2020d01 = { path = "rust/y2020/d01" }
+y2023d04 = { path = "rust/y2023/d04" }

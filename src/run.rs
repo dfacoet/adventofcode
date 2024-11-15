@@ -33,16 +33,24 @@ fn run_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>>
 
     println!("year {year} day {:02}", day);
     println!("=====================");
-    // find a reasonable way to get the right sol functions (macros?)
-    let (part1, part2): (SolutionFn, SolutionFn) = match (year, day) {
-        (2015, 1) => (y2015d01::part1, y2015d01::part2),
-        (2020, 1) => (y2020d01::part1, y2020d01::part2),
-        _ => panic!("Solution not found"),
-    };
+    let (part1, part2) = get_solution_functions(year, day)?;
 
     let sol1 = part1(input.clone())?;
     println!("Part 1: {sol1}");
     let sol2 = part2(input.clone())?;
     println!("Part 2: {sol2}");
     Ok(())
+}
+
+fn get_solution_functions(
+    year: &i32,
+    day: &u32,
+) -> Result<(SolutionFn, SolutionFn), Box<dyn std::error::Error>> {
+    // find a reasonable way to get the right sol functions (macros?)
+    match (year, day) {
+        (2015, 1) => Ok((y2015d01::part1, y2015d01::part2)),
+        (2020, 1) => Ok((y2020d01::part1, y2020d01::part2)),
+        (2023, 4) => Ok((y2023d04::part1, y2023d04::part2)),
+        _ => Err(format!("Solution code not found for {year}/{day}").into()),
+    }
 }
