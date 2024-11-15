@@ -4,6 +4,7 @@ use chrono::{Datelike, Utc};
 use chrono_tz::America::New_York;
 use clap::{Parser, Subcommand};
 use regex::Regex;
+mod run;
 
 const MIN_YEAR: i32 = 2015;
 const MAX_YEAR: i32 = 2023; // TODO: determine from date
@@ -36,7 +37,7 @@ enum Commands {
     /// Get puzzle input
     Get(DayParams),
     /// Run puzzle solutions
-    Run {},
+    Run(DayParams),
     /// Start an AoC day (get input, create template)
     // TODO: use different parameters, enable multiple languages
     Start(DayParams),
@@ -49,7 +50,7 @@ fn main() {
 
     match &cli.command {
         Commands::Get(params) => get(params),
-        Commands::Run {} => panic!("Run not implemented"),
+        Commands::Run(params) => run::run(params).unwrap(),
         Commands::Start(params) => start(params).unwrap(),
         Commands::Test(params) => test(params),
     }
@@ -370,6 +371,22 @@ fn create_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Erro
         members.push(new_project_path_str.as_str());
     }
     members.sort_by(|a, b| a.as_str().unwrap().cmp(b.as_str().unwrap()));
+
+    let dependencies = doc["dependencies"].as_table_mut().unwrap();
+    let dependency_name = format!("y{year}d{:02}", day);
+    dependencies.insert(
+        &dependency_name,
+        toml_edit::value({
+            let mut dep = toml_edit::InlineTable::new();
+            dep.insert(
+                "path",
+                toml_edit::value(new_project_path_str.as_str())
+                    .into_value()
+                    .unwrap(),
+            );
+            dep
+        }),
+    );
 
     fs::write("Cargo.toml", doc.to_string())?;
 
