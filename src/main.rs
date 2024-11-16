@@ -1,4 +1,4 @@
-use std::{fs, io::Write};
+use std::{fs, io::Write, str::FromStr};
 
 use chrono::{Datelike, Utc};
 use chrono_tz::America::New_York;
@@ -36,18 +36,29 @@ struct GetDayParams {
 
 #[derive(Parser)]
 struct RunDayParams {
-    #[command(subcommand)]
-    language: LangCommand,
+    language: Language,
     year: Option<i32>,
     day: Option<u32>,
     #[arg(short, long)]
     today: bool,
 }
 
-#[derive(Clone, Subcommand)]
-enum LangCommand {
+#[derive(Clone)]
+enum Language {
     Python,
     Rust,
+}
+
+impl FromStr for Language {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "python" => Ok(Language::Python),
+            "rust" => Ok(Language::Rust),
+            _ => Err(format!("'{}' is not a valid value for Language", s)),
+        }
+    }
 }
 
 #[derive(Subcommand)]
@@ -329,15 +340,16 @@ fn start(params: &RunDayParams) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn create_template(
-    language: &LangCommand,
+    language: &Language,
     year: &i32,
     day: &u32,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match language {
-        LangCommand::Python => panic!("not implemented"),
-        LangCommand::Rust => create_rust_template(year, day),
+        Language::Python => create_python_template(year, day),
+        Language::Rust => create_rust_template(year, day),
     }
 }
+
 fn create_rust_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
     write_input_file(year, day); // TODO: check silently
 
@@ -348,7 +360,7 @@ fn create_rust_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error:
 
     let solution_path = new_project_path.join(format!("y{year}d{:02}.rs", day));
     match fs::File::create_new(&solution_path) {
-        Ok(mut file) => file.write_all(templates::RUST_TEMPLATE.as_bytes()).unwrap(),
+        Ok(mut file) => file.write_all(templates::RUST_TEMPLATE.as_bytes())?,
         Err(e) => return Err(Box::new(e)),
     }
     let day_toml_path = new_project_path.join("Cargo.toml");
@@ -389,6 +401,20 @@ fn create_rust_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error:
     );
 
     fs::write("Cargo.toml", doc.to_string())?;
+
+    Ok(())
+}
+
+fn create_python_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
+    write_input_file(year, day); // TODO: check silently
+    let new_module_path_str = format!("pyaoc/solutions/y{year}/y{year}d{:02}.py", day);
+    let new_module_path = std::path::Path::new(&new_module_path_str);
+
+    fs::create_dir_all(new_module_path.parent().unwrap())?;
+    match fs::File::create_new(&new_module_path) {
+        Ok(mut file) => file.write_all(templates::PYTHON_TEMPLATE.as_bytes())?,
+        Err(e) => return Err(Box::new(e)),
+    }
 
     Ok(())
 }
