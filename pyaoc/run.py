@@ -3,8 +3,10 @@ from typing import Callable
 
 SolutionFn = Callable[[str], str]
 
+
 class SolutionNotFound(Exception):
     pass
+
 
 def run_solution(year: int, day: int):
     with open(f"input/y{year}d{day:02}.txt") as f:
