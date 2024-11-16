@@ -1,5 +1,10 @@
 # adventofcode
-Advent of code (AOC) solutions single repo
+Solutions to Advent of Code (AOC). Single repo for solutions in
+- Python
+- Rust
+- Haskell
+
+TODO: Migrate solutions scattered in other repos.
 
 ## CLI
 This project provides the `aoc` CLI utility.
