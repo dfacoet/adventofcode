@@ -18,7 +18,7 @@ struct Cli {
 }
 
 #[derive(Parser)]
-struct DayParams {
+struct GetDayParams {
     // TODO: enforce either year+day or --all here
     /// Year (either specify a year and day, use --today or use --all)
     // #[arg(short, long, value_parser=value_parser!(u16).range(MIN_YEAR as i64..=MAX_YEAR as i64))]
@@ -34,17 +34,33 @@ struct DayParams {
     all: bool,
 }
 
+#[derive(Parser)]
+struct RunDayParams {
+    #[command(subcommand)]
+    language: LangCommand,
+    year: Option<i32>,
+    day: Option<u32>,
+    #[arg(short, long)]
+    today: bool,
+}
+
+#[derive(Clone, Subcommand)]
+enum LangCommand {
+    Python,
+    Rust,
+}
+
 #[derive(Subcommand)]
 enum Commands {
     /// Get puzzle input
-    Get(DayParams),
+    Get(GetDayParams),
     /// Run puzzle solutions
-    Run(DayParams),
+    Run(GetDayParams),
     /// Start an AoC day (get input, create template)
     // TODO: use different parameters, enable multiple languages
-    Start(DayParams),
+    Start(RunDayParams),
     /// Test the solutions
-    Test(DayParams),
+    Test(GetDayParams),
 }
 
 fn main() {
@@ -58,15 +74,15 @@ fn main() {
     }
 }
 
-fn get(params: &DayParams) {
+fn get(params: &GetDayParams) {
     match params {
-        DayParams {
+        GetDayParams {
             year: Some(year),
             day: Some(day),
             today: false,
             all: false,
         } => write_input_file(year, day),
-        DayParams {
+        GetDayParams {
             year: None,
             day: None,
             today: true,
@@ -79,7 +95,7 @@ fn get(params: &DayParams) {
                 println!("Today is not an advent day");
             }
         }
-        DayParams {
+        GetDayParams {
             year: None,
             day: None,
             today: false,
@@ -181,10 +197,10 @@ fn get_input(year: &i32, day: &u32) -> Result<String, ()> {
     }
 }
 
-fn test(params: &DayParams) {
+fn test(params: &GetDayParams) {
     println!("Note: test only gets the answers for solved puzzles");
     match params {
-        DayParams {
+        GetDayParams {
             year: Some(year),
             day: Some(day),
             today: false,
@@ -193,7 +209,7 @@ fn test(params: &DayParams) {
             write_input_file(year, day);
             write_answer_file(year, day)
         }
-        DayParams {
+        GetDayParams {
             year: None,
             day: None,
             today: true,
@@ -207,7 +223,7 @@ fn test(params: &DayParams) {
                 println!("Today is not an advent day");
             }
         }
-        DayParams {
+        GetDayParams {
             year: None,
             day: None,
             today: false,
@@ -288,22 +304,22 @@ fn parse_answers_page(page: String) -> Result<String, ()> {
     }
 }
 
-fn start(params: &DayParams) -> Result<(), Box<dyn std::error::Error>> {
+fn start(params: &RunDayParams) -> Result<(), Box<dyn std::error::Error>> {
     match params {
-        DayParams {
+        RunDayParams {
+            language,
             year: Some(year),
             day: Some(day),
             today: false,
-            all: false,
-        } => create_template(year, day),
-        DayParams {
+        } => create_template(language, year, day),
+        RunDayParams {
+            language,
             year: None,
             day: None,
             today: true,
-            all: false,
         } => {
             if let Some((year, day)) = get_today_nyc() {
-                create_template(&year, &day)
+                create_template(language, &year, &day)
             } else {
                 Err("Today is not an advent day".into())
             }
@@ -312,7 +328,17 @@ fn start(params: &DayParams) -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-fn create_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
+fn create_template(
+    language: &LangCommand,
+    year: &i32,
+    day: &u32,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match language {
+        LangCommand::Python => panic!("not implemented"),
+        LangCommand::Rust => create_rust_template(year, day),
+    }
+}
+fn create_rust_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
     write_input_file(year, day); // TODO: check silently
 
     // create daily project directory and template source and Cargo.toml files

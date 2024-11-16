@@ -26,3 +26,10 @@ aoc = \"*\"
 "
     )
 }
+
+pub const PYTHON_TEMPLATE: &str = "def part1(input_str: str) -> str:
+    raise NotImplementedError
+
+def part2(input_str: str) -> str:
+    raise NotImplementedError
+";

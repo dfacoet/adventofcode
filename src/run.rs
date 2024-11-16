@@ -1,16 +1,16 @@
 use std::fs;
 
-use crate::{get_today_nyc, DayParams};
+use crate::{get_today_nyc, GetDayParams};
 
-pub fn run(params: &DayParams) -> Result<(), Box<dyn std::error::Error>> {
+pub fn run(params: &GetDayParams) -> Result<(), Box<dyn std::error::Error>> {
     match params {
-        DayParams {
+        GetDayParams {
             year: Some(year),
             day: Some(day),
             today: false,
             all: false,
         } => run_solution(year, day),
-        DayParams {
+        GetDayParams {
             year: None,
             day: None,
             today: true,
