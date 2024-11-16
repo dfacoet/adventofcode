@@ -45,6 +45,7 @@ struct RunDayParams {
 
 #[derive(Clone, Copy)]
 enum Language {
+    Haskell,
     Python,
     Rust,
 }
@@ -54,6 +55,7 @@ impl FromStr for Language {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
+            "haskell" => Ok(Language::Haskell),
             "python" => Ok(Language::Python),
             "rust" => Ok(Language::Rust),
             _ => Err(format!("'{}' is not a valid value for Language", s)),
@@ -345,6 +347,7 @@ fn create_template(
     day: &u32,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match language {
+        Language::Haskell => Err("Haskell template not implemented".into()),
         Language::Python => create_python_template(year, day),
         Language::Rust => create_rust_template(year, day),
     }
@@ -411,7 +414,7 @@ fn create_python_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::erro
     let new_module_path = std::path::Path::new(&new_module_path_str);
 
     fs::create_dir_all(new_module_path.parent().unwrap())?;
-    match fs::File::create_new(&new_module_path) {
+    match fs::File::create_new(new_module_path) {
         Ok(mut file) => file.write_all(templates::PYTHON_TEMPLATE.as_bytes())?,
         Err(e) => return Err(Box::new(e)),
     }

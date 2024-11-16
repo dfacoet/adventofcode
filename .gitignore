@@ -12,3 +12,6 @@ aoc
 
 # Python
 __pycache__
+
+# Haskell
+.stack-work
