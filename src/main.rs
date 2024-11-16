@@ -346,16 +346,15 @@ fn create_template(
     year: &i32,
     day: &u32,
 ) -> Result<(), Box<dyn std::error::Error>> {
+    write_input_file(year, day); // TODO: check silently
     match language {
-        Language::Haskell => Err("Haskell template not implemented".into()),
+        Language::Haskell => create_haskell_template(year, day),
         Language::Python => create_python_template(year, day),
         Language::Rust => create_rust_template(year, day),
     }
 }
 
 fn create_rust_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
-    write_input_file(year, day); // TODO: check silently
-
     // create daily project directory and template source and Cargo.toml files
     let new_project_path_str = format!("rust/y{year}/d{:02}", day);
     let new_project_path = std::path::Path::new(&new_project_path_str);
@@ -387,10 +386,10 @@ fn create_rust_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error:
     }
     members.sort_by(|a, b| a.as_str().unwrap().cmp(b.as_str().unwrap()));
 
+    let module_name = format!("y{year}d{:02}", day);
     let dependencies = doc["dependencies"].as_table_mut().unwrap();
-    let dependency_name = format!("y{year}d{:02}", day);
     dependencies.insert(
-        &dependency_name,
+        &module_name,
         toml_edit::value({
             let mut dep = toml_edit::InlineTable::new();
             dep.insert(
@@ -404,12 +403,14 @@ fn create_rust_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error:
     );
 
     fs::write("Cargo.toml", doc.to_string())?;
+    println!("Rust template created. Remember to add"); // TODO: automate
+    println!("({year}, {day}) => Ok(({module_name}::part1, {module_name}::part2))");
+    println!("To the lookup table in run::get_solution_functions");
 
     Ok(())
 }
 
 fn create_python_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
-    write_input_file(year, day); // TODO: check silently
     let new_module_path_str = format!("pyaoc/solutions/y{year}/y{year}d{:02}.py", day);
     let new_module_path = std::path::Path::new(&new_module_path_str);
 
@@ -419,5 +420,21 @@ fn create_python_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::erro
         Err(e) => return Err(Box::new(e)),
     }
 
+    Ok(())
+}
+
+fn create_haskell_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
+    let new_module_path_str = format!("haskell/src/Year{year}/Day{:02}.hs", day);
+    let new_module_path = std::path::Path::new(&new_module_path_str);
+
+    fs::create_dir_all(new_module_path.parent().unwrap())?;
+    match fs::File::create_new(new_module_path) {
+        Ok(mut file) => file.write_all(templates::haskell_template(year, day).as_bytes())?,
+        Err(e) => return Err(Box::new(e)),
+    }
+
+    println!("Haskell template created. Remember to add the solution module to"); // TODO: automate
+    println!("- The library.exposed-modules in package.yaml");
+    println!("- The lookup table in Main.solutionMap");
     Ok(())
 }

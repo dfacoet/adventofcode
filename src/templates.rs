@@ -33,3 +33,17 @@ pub const PYTHON_TEMPLATE: &str = "def part1(input_str: str) -> str:
 def part2(input_str: str) -> str:
     raise NotImplementedError
 ";
+
+pub fn haskell_template(year: &i32, day: &u32) -> String {
+    format!(
+        "module Year{year}.Day{:02} (part1, part2) where
+
+part1 :: String -> String
+part1 = error \"Part1 not implemented\"
+
+part2 :: String -> String
+part2 = error \"Part2 not implemented\"
+",
+        day
+    )
+}
