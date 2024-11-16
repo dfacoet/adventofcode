@@ -9,3 +9,6 @@ target
 
 # CLI executable
 aoc
+
+# Python
+__pycache__

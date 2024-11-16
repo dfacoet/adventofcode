@@ -1,23 +1,35 @@
 use std::fs;
 
-use crate::{get_today_nyc, GetDayParams};
+use crate::{get_today_nyc, Language, RunDayParams};
+use std::process::Command;
 
-pub fn run(params: &GetDayParams) -> Result<(), Box<dyn std::error::Error>> {
+pub fn run(params: &RunDayParams) -> Result<(), Box<dyn std::error::Error>> {
     match params {
-        GetDayParams {
+        RunDayParams {
+            language: Language::Python,
             year: Some(year),
             day: Some(day),
             today: false,
-            all: false,
-        } => run_solution(year, day),
-        GetDayParams {
+        } => run_python_solution(year, day),
+        RunDayParams {
+            language: Language::Rust,
+            year: Some(year),
+            day: Some(day),
+            today: false,
+        } => run_rust_solution(year, day),
+        RunDayParams {
+            language,
             year: None,
             day: None,
             today: true,
-            all: false,
         } => {
             if let Some((year, day)) = get_today_nyc() {
-                run_solution(&year, &day)
+                run(&RunDayParams {
+                    language: *language,
+                    year: Some(year),
+                    day: Some(day),
+                    today: false,
+                })
             } else {
                 Err("Today is not an advent day".into())
             }
@@ -28,11 +40,11 @@ pub fn run(params: &GetDayParams) -> Result<(), Box<dyn std::error::Error>> {
 
 type SolutionFn = fn(String) -> Result<String, Box<dyn std::error::Error>>;
 
-fn run_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
+fn run_rust_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
     let input = fs::read_to_string(format!("input/y{year}d{:02}.txt", day))?;
 
     println!("year {year} day {:02}", day);
-    println!("=====================");
+    println!("================");
     let (part1, part2) = get_solution_functions(year, day)?;
 
     let sol1 = part1(input.clone())?;
@@ -53,4 +65,21 @@ fn get_solution_functions(
         (2023, 4) => Ok((y2023d04::part1, y2023d04::part2)),
         _ => Err(format!("Solution code not found for {year}/{day}").into()),
     }
+}
+
+fn run_python_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
+    let status = Command::new("uv")
+        .arg("run")
+        .arg("python")
+        .arg("-m")
+        .arg("pyaoc")
+        .arg(year.to_string())
+        .arg(day.to_string())
+        .status()?;
+
+    if !status.success() {
+        return Err("Failed to run Python solution".into());
+    }
+
+    Ok(())
 }

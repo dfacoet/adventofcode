@@ -43,7 +43,7 @@ struct RunDayParams {
     today: bool,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 enum Language {
     Python,
     Rust,
@@ -66,7 +66,7 @@ enum Commands {
     /// Get puzzle input
     Get(GetDayParams),
     /// Run puzzle solutions
-    Run(GetDayParams),
+    Run(RunDayParams),
     /// Start an AoC day (get input, create template)
     // TODO: use different parameters, enable multiple languages
     Start(RunDayParams),
