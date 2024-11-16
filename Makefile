@@ -10,11 +10,14 @@ TARGET_DIR := target/release
 EXECUTABLE_PATH := $(TARGET_DIR)/$(EXECUTABLE_NAME)
 
 # Default target: build and copy the executable
-all: build
+all: haskell rust
 
 # Build the project in release mode and copy the resulting executable to the root directory
-build:
+rust:
 	@cargo build --release
 	@cp $(EXECUTABLE_PATH) .
 
-.PHONY: all build
+haskell:
+	@stack build
+
+.PHONY: all rust haskell

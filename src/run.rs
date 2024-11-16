@@ -6,17 +6,15 @@ use std::process::Command;
 pub fn run(params: &RunDayParams) -> Result<(), Box<dyn std::error::Error>> {
     match params {
         RunDayParams {
-            language: Language::Python,
+            language,
             year: Some(year),
             day: Some(day),
             today: false,
-        } => run_python_solution(year, day),
-        RunDayParams {
-            language: Language::Rust,
-            year: Some(year),
-            day: Some(day),
-            today: false,
-        } => run_rust_solution(year, day),
+        } => match language {
+            Language::Haskell => run_haskell_solution(year, day),
+            Language::Python => run_python_solution(year, day),
+            Language::Rust => run_rust_solution(year, day),
+        },
         RunDayParams {
             language,
             year: None,
@@ -67,12 +65,29 @@ fn get_solution_functions(
     }
 }
 
+// TODO: unify run_solutions that just a Command?
+
 fn run_python_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
     let status = Command::new("uv")
         .arg("run")
         .arg("python")
         .arg("-m")
         .arg("pyaoc")
+        .arg(year.to_string())
+        .arg(day.to_string())
+        .status()?;
+
+    if !status.success() {
+        return Err("Failed to run Python solution".into());
+    }
+
+    Ok(())
+}
+
+fn run_haskell_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
+    let status = Command::new("stack")
+        .arg("exec")
+        .arg("haskell-exe")
         .arg(year.to_string())
         .arg(day.to_string())
         .status()?;
