@@ -1,7 +1,7 @@
 module Year2015.Day01 (part1, part2) where
 
 part1 :: String -> String
-part1 input = show $ sum $ map evalChar input
+part1 = show . sum . map evalChar
 
 part2 :: String -> String
 part2 input =

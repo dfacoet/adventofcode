@@ -4,6 +4,9 @@ import qualified Data.Map as Map
 import System.Environment (getArgs)
 import Text.Printf (printf)
 import qualified Year2015.Day01
+import qualified Year2019.Day01
+import qualified Year2019.Day04
+import qualified Year2019.Day08
 
 main :: IO ()
 main = do
@@ -33,5 +36,8 @@ type SolutionFn = String -> String
 solutionMap :: Map.Map (Integer, Integer) (SolutionFn, SolutionFn)
 solutionMap =
   Map.fromList
-    [ ((2015, 1), (Year2015.Day01.part1, Year2015.Day01.part2))
+    [ ((2015, 1), (Year2015.Day01.part1, Year2015.Day01.part2)),
+      ((2019, 1), (Year2019.Day01.part1, Year2019.Day01.part2)),
+      ((2019, 4), (Year2019.Day04.part1, Year2019.Day04.part2)),
+      ((2019, 8), (Year2019.Day08.part1, Year2019.Day08.part2))
     ]

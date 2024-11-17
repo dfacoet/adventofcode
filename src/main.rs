@@ -405,7 +405,7 @@ fn create_rust_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::error:
     fs::write("Cargo.toml", doc.to_string())?;
     println!("Rust template created. Remember to add"); // TODO: automate
     println!("({year}, {day}) => Ok(({module_name}::part1, {module_name}::part2))");
-    println!("To the lookup table in run::get_solution_functions");
+    println!("to the lookup table in run::get_solution_functions");
 
     Ok(())
 }
@@ -433,8 +433,11 @@ fn create_haskell_template(year: &i32, day: &u32) -> Result<(), Box<dyn std::err
         Err(e) => return Err(Box::new(e)),
     }
 
-    println!("Haskell template created. Remember to add the solution module to"); // TODO: automate
-    println!("- The library.exposed-modules in package.yaml");
-    println!("- The lookup table in Main.solutionMap");
+    println!("Haskell template created. Remember to add the solution module"); // TODO: automate
+    println!(
+        "(({year}, {day}), (Year{year}.Day{:02}.part1, Year{year}.Day{:02}.part2))",
+        day, day
+    );
+    println!("to the lookup table in Main.solutionMap");
     Ok(())
 }

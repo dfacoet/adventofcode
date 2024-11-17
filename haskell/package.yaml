@@ -21,6 +21,8 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- containers
+- split >= 0.2
 
 ghc-options:
 - -Wall
@@ -35,8 +37,6 @@ ghc-options:
 
 library:
   source-dirs: src
-  exposed-modules:
-  - Year2015.Day01
 
 executables:
   haskell-exe:
@@ -48,7 +48,6 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - haskell
-    - containers
 
 tests:
   haskell-test:
