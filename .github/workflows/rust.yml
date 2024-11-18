@@ -17,7 +17,7 @@ jobs:
           profile: minimal
           toolchain: stable
           override: true
-          components: rustfmt, clippy  
+          components: rustfmt, clippy
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
         continue-on-error: true  # WARNING: only for this example, remove it!
@@ -48,7 +48,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
-      
+
   build:
 
     runs-on: ubuntu-latest

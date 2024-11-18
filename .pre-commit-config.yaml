@@ -1,0 +1,47 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-added-large-files
+
+-   repo: local
+    hooks:
+    -   id: cargo-fmt
+        name: cargo fmt
+        entry: cargo fmt --all -- --check
+        language: system
+        files: \.rs$
+        types: [file]
+    -   id: cargo-check
+        name: cargo check
+        entry: cargo check
+        language: system
+        files: \.rs$
+        types: [file]
+        pass_filenames: false
+    -   id: cargo-clippy
+        name: cargo clippy
+        entry: cargo clippy -- -D warnings
+        language: system
+        files: \.rs$
+        types: [file]
+        pass_filenames: false
+
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.7.4
+  hooks:
+    # Run the linter.
+    - id: ruff
+    # Run the formatter.
+    - id: ruff-format
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.13.0
+  hooks:
+    - id: mypy
+      args: [--install-types, --non-interactive]
