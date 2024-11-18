@@ -1,8 +1,8 @@
 module Main (main) where
 
-import qualified Data.Map as Map
-import System.Environment (getArgs)
-import Text.Printf (printf)
+import qualified Data.Map           as Map
+import           System.Environment (getArgs)
+import           Text.Printf        (printf)
 import qualified Year2015.Day01
 import qualified Year2019.Day01
 import qualified Year2019.Day04
@@ -14,10 +14,10 @@ main = do
   case args of
     [yearStr, dayStr] -> case (reads yearStr, reads dayStr) of
       ((year, "") : _, (day, "") : _) -> runSolution year day Nothing
-      _ -> usageError
+      _                               -> usageError
     [yearStr, dayStr, "--input", inputPath] -> case (reads yearStr, reads dayStr) of
       ((year, "") : _, (day, "") : _) -> runSolution year day (Just inputPath)
-      _ -> usageError
+      _                               -> usageError
     _ -> usageError
 
 usageError :: IO ()
@@ -28,7 +28,7 @@ runSolution year day path = do
   input <-
     readFile
       ( case path of
-          Just p -> p
+          Just p  -> p
           Nothing -> printf "input/y%dd%02d.txt" year day
       )
   putStrLn $ printf "year %d day %02d" year day

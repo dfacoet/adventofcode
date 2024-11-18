@@ -1,9 +1,9 @@
 module Year2019.Day08 (part1, part2) where
 
-import Data.Foldable (minimumBy)
-import Data.List (dropWhileEnd)
-import qualified Data.Map as Map
-import Data.Ord (comparing)
+import           Data.Foldable (minimumBy)
+import           Data.List     (dropWhileEnd)
+import qualified Data.Map      as Map
+import           Data.Ord      (comparing)
 
 part1 :: String -> String
 part1 s = show $ score $ minimumBy nZerosComp $ map countOccurrences $ layers $ dropWhileEnd (== '\n') s
@@ -20,6 +20,7 @@ part2 s = unlines $ reshape layerWidth $ map getFirstPixel $ transpose $ layers 
     getFirstPixel sec = case head $ filter (/= '2') sec of
       '0' -> ' '
       '1' -> '█'
+      _   -> error "value errro - pixel should be 0 or 1"
 
 layerHeight :: Int
 layerHeight = 6
@@ -41,4 +42,4 @@ countOccurrences = foldr (\x acc -> Map.insertWith (+) x 1 acc) Map.empty
 
 transpose :: [[a]] -> [[a]]
 transpose ([] : _) = []
-transpose rows = map head rows : transpose (map tail rows)
+transpose rows     = map head rows : transpose (map tail rows)
