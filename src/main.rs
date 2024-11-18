@@ -1,4 +1,4 @@
-use std::{fs, io::Write, str::FromStr};
+use std::{fs, io::Write, path::PathBuf, str::FromStr};
 
 use chrono::{Datelike, Utc};
 use chrono_tz::America::New_York;
@@ -41,6 +41,18 @@ struct RunDayParams {
     day: Option<u32>,
     #[arg(short, long)]
     today: bool,
+    /// Path to input file. Defaults to input/y{year}d{day:02}.txt
+    #[arg(short, long)]
+    input: Option<PathBuf>,
+}
+
+#[derive(Parser)]
+struct StartDayParams {
+    language: Language,
+    year: Option<i32>,
+    day: Option<u32>,
+    #[arg(short, long)]
+    today: bool,
 }
 
 #[derive(Clone, Copy)]
@@ -70,8 +82,7 @@ enum Commands {
     /// Run puzzle solutions
     Run(RunDayParams),
     /// Start an AoC day (get input, create template)
-    // TODO: use different parameters, enable multiple languages
-    Start(RunDayParams),
+    Start(StartDayParams),
     /// Test the solutions
     Test(GetDayParams),
 }
@@ -317,15 +328,15 @@ fn parse_answers_page(page: String) -> Result<String, ()> {
     }
 }
 
-fn start(params: &RunDayParams) -> Result<(), Box<dyn std::error::Error>> {
+fn start(params: &StartDayParams) -> Result<(), Box<dyn std::error::Error>> {
     match params {
-        RunDayParams {
+        StartDayParams {
             language,
             year: Some(year),
             day: Some(day),
             today: false,
         } => create_template(language, year, day),
-        RunDayParams {
+        StartDayParams {
             language,
             year: None,
             day: None,

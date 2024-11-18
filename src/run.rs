@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, path::PathBuf, str::FromStr};
 
 use crate::{get_today_nyc, Language, RunDayParams};
 use std::process::Command;
@@ -10,16 +10,18 @@ pub fn run(params: &RunDayParams) -> Result<(), Box<dyn std::error::Error>> {
             year: Some(year),
             day: Some(day),
             today: false,
+            input,
         } => match language {
-            Language::Haskell => run_haskell_solution(year, day),
-            Language::Python => run_python_solution(year, day),
-            Language::Rust => run_rust_solution(year, day),
+            Language::Haskell => run_haskell_solution(year, day, input),
+            Language::Python => run_python_solution(year, day, input),
+            Language::Rust => run_rust_solution(year, day, input),
         },
         RunDayParams {
             language,
             year: None,
             day: None,
             today: true,
+            input,
         } => {
             if let Some((year, day)) = get_today_nyc() {
                 run(&RunDayParams {
@@ -27,6 +29,7 @@ pub fn run(params: &RunDayParams) -> Result<(), Box<dyn std::error::Error>> {
                     year: Some(year),
                     day: Some(day),
                     today: false,
+                    input: input.clone(),
                 })
             } else {
                 Err("Today is not an advent day".into())
@@ -38,8 +41,16 @@ pub fn run(params: &RunDayParams) -> Result<(), Box<dyn std::error::Error>> {
 
 type SolutionFn = fn(String) -> Result<String, Box<dyn std::error::Error>>;
 
-fn run_rust_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
-    let input = fs::read_to_string(format!("input/y{year}d{:02}.txt", day))?;
+fn run_rust_solution(
+    year: &i32,
+    day: &u32,
+    input_path: &Option<PathBuf>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let input_path = match input_path {
+        Some(path) => path.clone(),
+        None => PathBuf::from_str(&format!("input/y{year}d{:02}.txt", day))?,
+    };
+    let input = fs::read_to_string(input_path)?;
 
     println!("year {year} day {:02}", day);
     println!("================");
@@ -65,16 +76,22 @@ fn get_solution_functions(
     }
 }
 
-// TODO: unify run_solutions that just a Command?
+// TODO: unify run_solutions that just runs a Command?
 
-fn run_python_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
-    let status = Command::new("uv")
-        .arg("run")
-        .arg("python")
-        .arg("-m")
-        .arg("pyaoc")
+fn run_python_solution(
+    year: &i32,
+    day: &u32,
+    input_path: &Option<PathBuf>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let status = Command::new("uv run python -m pyaoc")
         .arg(year.to_string())
         .arg(day.to_string())
+        .args(
+            input_path // add --input path if input_path is Some(path)
+                .as_ref()
+                .map(|path| vec!["--input", path.to_str().unwrap()])
+                .unwrap_or_default(),
+        )
         .status()?;
 
     if !status.success() {
@@ -84,12 +101,20 @@ fn run_python_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::
     Ok(())
 }
 
-fn run_haskell_solution(year: &i32, day: &u32) -> Result<(), Box<dyn std::error::Error>> {
-    let status = Command::new("stack")
-        .arg("exec")
-        .arg("haskell-exe")
+fn run_haskell_solution(
+    year: &i32,
+    day: &u32,
+    input_path: &Option<PathBuf>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let status = Command::new("stack exec haskell-exe")
         .arg(year.to_string())
         .arg(day.to_string())
+        .args(
+            input_path // add --input path if input_path is Some(path)
+                .as_ref()
+                .map(|path| vec!["--input", path.to_str().unwrap()])
+                .unwrap_or_default(),
+        )
         .status()?;
 
     if !status.success() {

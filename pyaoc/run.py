@@ -8,8 +8,10 @@ class SolutionNotFound(Exception):
     pass
 
 
-def run_solution(year: int, day: int):
-    with open(f"input/y{year}d{day:02}.txt") as f:
+def run_solution(year: int, day: int, input_path: str | None):
+    if input_path is None:
+        input_path = f"input/y{year}d{day:02}.txt"
+    with open(input_path) as f:
         input_string = f.read()
 
     module_name = f"y{year}d{day:02}"

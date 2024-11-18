@@ -13,16 +13,24 @@ main = do
   args <- getArgs
   case args of
     [yearStr, dayStr] -> case (reads yearStr, reads dayStr) of
-      ((year, "") : _, (day, "") : _) -> runSolution year day
+      ((year, "") : _, (day, "") : _) -> runSolution year day Nothing
+      _ -> usageError
+    [yearStr, dayStr, "--input", inputPath] -> case (reads yearStr, reads dayStr) of
+      ((year, "") : _, (day, "") : _) -> runSolution year day (Just inputPath)
       _ -> usageError
     _ -> usageError
 
 usageError :: IO ()
-usageError = putStrLn "Usage: haskell-exe <year> <day>"
+usageError = putStrLn "Usage: haskell-exe <year> <day> [optional: --input <input_file_path>]"
 
-runSolution :: Integer -> Integer -> IO ()
-runSolution year day = do
-  input <- readFile $ printf "input/y%dd%02d.txt" year day
+runSolution :: Integer -> Integer -> Maybe String -> IO ()
+runSolution year day path = do
+  input <-
+    readFile
+      ( case path of
+          Just p -> p
+          Nothing -> printf "input/y%dd%02d.txt" year day
+      )
   putStrLn $ printf "year %d day %02d" year day
   putStrLn "================"
   case Map.lookup (year, day) solutionMap of
