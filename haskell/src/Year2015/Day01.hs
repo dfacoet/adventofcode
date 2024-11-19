@@ -15,4 +15,4 @@ evalChar :: Char -> Integer
 evalChar c = case c of
   '(' -> 1
   ')' -> -1
-  _ -> error "invalid character"
+  _   -> error "invalid character"
