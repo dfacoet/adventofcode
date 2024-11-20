@@ -1,5 +1,5 @@
 use regex::Regex;
-use std::{cmp::max, cmp::min, str::FromStr};
+use std::str::FromStr;
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let bots = parse_input(input)?;
@@ -10,6 +10,11 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     Ok(n_in_range.to_string())
 }
 
+/// Bisection method: take the whole space, and iteratively split it in two,
+/// and keep the region intersecting the most Bot Manhattan balls.
+/// I don't think this is guaranteed to work an all inputs (local maximum?),
+/// and it needs some cleaning up (especially around inclusive/exclusive ranges etc),
+/// but it works on my input.
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let bots = parse_input(input)?;
 
@@ -21,25 +26,34 @@ pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     //         region.1[i] = max(region.1[i], bot.pos[i]);
     //     }
     // }
-    let mut region: Region = ([i32::MIN / 10; 3], [i32::MAX / 10; 3]);
+    let mut region: Region = ([i32::MIN / 2; 3], [i32::MAX / 2; 3]);
 
     // Recursively select the half region intersecting the most bots
     while dist(&region.0, &region.1) > 3 {
-        println!("{:?}", region);
-        println!("{:?}", dist(&region.0, &[0, 0, 0]));
-        println!("{:?}", dist(&region.1, &[0, 0, 0]));
         let new_regions = split(&region);
         region = *new_regions
             .iter()
-            .max_by_key(|r| bots.iter().filter(|bot| bot.in_range_region(r)).count())
+            .max_by_key(|r| (bots.iter().filter(|bot| bot.in_range_region(r)).count()))
             .ok_or("No regions")?;
     }
 
-    Ok(format!("{:?}, {}", region, volume(region)))
+    // When the region is small enough, iterate over the points in the region.
+    // This is a lazy way to avoid bisecting properly
+
+    let points = region_points(&region);
+    let max_point = points
+        .iter()
+        .max_by_key(|p| {
+            (
+                bots.iter().filter(|bot| dist(p, &bot.pos) <= bot.r).count(),
+                dist(p, &[0, 0, 0]),
+            )
+        })
+        .ok_or("No points in region")?;
+
+    Ok(dist(max_point, &[0, 0, 0]).to_string())
 }
 
-// 597345651 is too high
-// 644245088
 type Coord = [i32; 3];
 
 struct Bot {
@@ -74,7 +88,34 @@ impl Bot {
     }
 
     fn in_range_region(&self, r: &Region) -> bool {
-        true
+        // The region has points in range if either
+        // - one of the vertices of the bot's Manhattan ball is in the region
+        // - one of the corners of the region is in the Manhattan ball
+        for i in 0..3 {
+            let mut vertex = self.pos;
+            vertex[i] += self.r as i32;
+            if region_contains(r, &vertex) {
+                return true;
+            };
+            let mut vertex = self.pos;
+            vertex[i] -= self.r as i32;
+            if region_contains(r, &vertex) {
+                return true;
+            };
+        }
+        for i in 0..8 {
+            let mut corner = [0; 3];
+            for j in 0..3 {
+                // i ~3 bits; the j-th bit of i determines
+                // whether the j-th coordinate is taken from r.0 or r.1
+                // This generates all 8 vertices iterating over i
+                corner[j] = if (i & (1 << j)) == 0 { r.0[j] } else { r.1[j] };
+            }
+            if dist(&self.pos, &corner) <= self.r {
+                return true;
+            };
+        }
+        false
     }
 }
 
@@ -84,13 +125,6 @@ fn parse_input(input: String) -> Result<Vec<Bot>, Box<dyn std::error::Error>> {
 
 // Represent a rectangular region of space as two opposite vertices
 type Region = (Coord, Coord);
-
-fn volume(r: Region) -> u64 {
-    r.1.iter()
-        .zip(r.0.iter())
-        .map(|(a, b)| (a - b).abs() as u64)
-        .product()
-}
 
 fn split(r: &Region) -> Vec<Region> {
     // split the region in two along the longest dimension
@@ -108,4 +142,22 @@ fn split(r: &Region) -> Vec<Region> {
     v2[max_d] = c;
 
     vec![(r.0, v1), (v2, r.1)]
+}
+
+fn region_contains(r: &Region, p: &Coord) -> bool {
+    p.iter()
+        .zip(r.0.iter().zip(r.1.iter()))
+        .all(|(x, (c1, c2))| c1 <= x && x <= c2)
+}
+
+fn region_points(r: &Region) -> Vec<Coord> {
+    let mut points = vec![];
+    for i in r.0[0]..=r.1[0] {
+        for j in r.0[1]..=r.1[1] {
+            for k in r.0[2]..=r.1[2] {
+                points.push([i, j, k]);
+            }
+        }
+    }
+    points
 }
