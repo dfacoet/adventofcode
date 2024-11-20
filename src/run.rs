@@ -84,15 +84,17 @@ fn run_python_solution(
     day: &u32,
     input_path: &Option<PathBuf>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let status = Command::new("uv run python -m pyaoc")
+    let status = Command::new("uv")
+        .arg("run")
+        .arg("python")
+        .arg("-m")
+        .arg("pyaoc")
         .arg(year.to_string())
         .arg(day.to_string())
-        .args(
-            input_path // add --input path if input_path is Some(path)
-                .as_ref()
-                .map(|path| vec!["--input", path.to_str().unwrap()])
-                .unwrap_or_default(),
-        )
+        .args(match input_path {
+            Some(path) => vec!["--input", path.to_str().unwrap()],
+            None => vec![],
+        })
         .status()?;
 
     if !status.success() {
@@ -107,19 +109,20 @@ fn run_haskell_solution(
     day: &u32,
     input_path: &Option<PathBuf>,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let status = Command::new("stack exec haskell-exe")
+    let status = Command::new("stack")
+        .arg("exec")
+        .arg("haskell-exe")
+        .arg("--")
         .arg(year.to_string())
         .arg(day.to_string())
-        .args(
-            input_path // add --input path if input_path is Some(path)
-                .as_ref()
-                .map(|path| vec!["--input", path.to_str().unwrap()])
-                .unwrap_or_default(),
-        )
+        .args(match input_path {
+            Some(path) => vec!["--input", path.to_str().unwrap()],
+            None => vec![],
+        })
         .status()?;
 
     if !status.success() {
-        return Err("Failed to run Python solution".into());
+        return Err("Failed to run Haskell solution".into());
     }
 
     Ok(())
