@@ -1,5 +1,5 @@
 [workspace]
-members = ["rust/y2015/d01", "rust/y2020/d01", "rust/y2023/d04"]
+members = ["rust/y2015/d01", "rust/y2018/d23", "rust/y2020/d01", "rust/y2023/d04"]
 
 [package]
 name = "aoc"
@@ -17,3 +17,4 @@ toml_edit = "0.22.22"
 y2015d01 = { path = "rust/y2015/d01" }
 y2020d01 = { path = "rust/y2020/d01" }
 y2023d04 = { path = "rust/y2023/d04" }
+y2018d23 = { path = "rust/y2018/d23" }

@@ -70,6 +70,7 @@ fn get_solution_functions(
     // find a reasonable way to get the right sol functions (macros?)
     match (year, day) {
         (2015, 1) => Ok((y2015d01::part1, y2015d01::part2)),
+        (2018, 23) => Ok((y2018d23::part1, y2018d23::part2)),
         (2020, 1) => Ok((y2020d01::part1, y2020d01::part2)),
         (2023, 4) => Ok((y2023d04::part1, y2023d04::part2)),
         _ => Err(format!("Solution code not found for {year}/{day}").into()),
