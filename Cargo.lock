@@ -108,6 +108,7 @@ dependencies = [
  "reqwest 0.12.9",
  "toml_edit",
  "y2015d01",
+ "y2018d23",
  "y2020d01",
  "y2023d04",
 ]
@@ -2451,6 +2452,14 @@ name = "y2015d01"
 version = "0.1.0"
 dependencies = [
  "aoc 0.6.1",
+]
+
+[[package]]
+name = "y2018d23"
+version = "0.1.0"
+dependencies = [
+ "aoc 0.6.1",
+ "regex",
 ]
 
 [[package]]
