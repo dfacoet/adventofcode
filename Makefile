@@ -10,7 +10,8 @@ TARGET_DIR := target/release
 EXECUTABLE_PATH := $(TARGET_DIR)/$(EXECUTABLE_NAME)
 
 # Default target: build and copy the executable
-all: haskell rust
+all: haskell python rust dev
+build: haskell python rust
 
 # Build the project in release mode and copy the resulting executable to the root directory
 rust:
@@ -19,5 +20,12 @@ rust:
 
 haskell:
 	@stack build
+
+python:
+	@uv sync
+
+dev:
+	@uv sync
+	@uv run pre-commit install
 
 .PHONY: all rust haskell

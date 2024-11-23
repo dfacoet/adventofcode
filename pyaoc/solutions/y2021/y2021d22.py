@@ -1,7 +1,8 @@
 from dataclasses import dataclass
+import itertools
 import re
 from typing import Literal
-from collections.abc import Sequence
+from collections.abc import Iterable
 
 
 def part1(input_str: str) -> str:
@@ -50,26 +51,16 @@ def parse_line(s: str) -> Box:
 
 
 def execute(instruction: Box, state: State) -> State:
-    new_state = []
-    for box in state:
-        if box.state == instruction.state:
-            new_state.append(box)
-        else:
-            new_state.extend(intersect(instruction, box))
-    return []
+    return list(
+        itertools.chain.from_iterable(intersect(instruction, box) for box in state)
+    )
 
 
-def tuples_intersect(t1: tuple[int, int], t2: tuple[int, int]) -> bool:
-    return (t1[0] < t2[0] < t1[1]) or (t2[0] < t1[0] < t1[0])
-
-
-def intersect(i: Box, box: Box) -> Sequence[Box]:
-    if not any(tuples_intersect(getattr(i, d), getattr(box, d)) for d in "xyz"):
-        # no intersection, box stays as it is
-        return box
-    
-    # todo: for each dimension, the instruction segment can
-    # - not intersect (if any, there is no intersection)
-    # - partially overlap (split the dimension in two, flip one)
-    # - include the box (flip without splitting)
-    # - be within the box (split in three, flip one)
+def intersect(i: Box, box: Box) -> Iterable[Box]:
+    boxes = [box]
+    for dim in "xyz":
+        new_boxes: list[Box] = []
+        for box in boxes:
+            # compare box.getattr(dim) and i.getattr(dim)
+            pass
+    return new_boxes
