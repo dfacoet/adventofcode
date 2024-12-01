@@ -23,7 +23,6 @@ dependencies:
 - base >= 4.7 && < 5
 - containers
 - split >= 0.2
-- counter >= 0.1.0.2
 
 ghc-options:
 - -Wall

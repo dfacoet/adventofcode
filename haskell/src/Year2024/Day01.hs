@@ -1,8 +1,8 @@
 module Year2024.Day01 (part1, part2) where
 
-import           Data.Counter (count)
-import           Data.List    (sort)
-import           Data.Map     (findWithDefault)
+import           Data.List   (sort)
+import           Data.Map    (findWithDefault)
+import           Lib.Counter (count)
 
 part1 :: String -> String
 part1 input =

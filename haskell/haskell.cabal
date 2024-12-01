@@ -21,7 +21,7 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      Lib.Counter
       Year2015.Day01
       Year2019.Day01
       Year2019.Day04
@@ -37,7 +37,6 @@ library
   build-depends:
       base >=4.7 && <5
     , containers
-    , counter >=0.1.0.2
     , split >=0.2
   default-language: Haskell2010
 
@@ -53,7 +52,6 @@ executable haskell-exe
   build-depends:
       base >=4.7 && <5
     , containers
-    , counter >=0.1.0.2
     , haskell
     , split >=0.2
   default-language: Haskell2010
@@ -71,7 +69,6 @@ test-suite haskell-test
   build-depends:
       base >=4.7 && <5
     , containers
-    , counter >=0.1.0.2
     , haskell
     , split >=0.2
   default-language: Haskell2010
