@@ -8,6 +8,7 @@ import qualified Year2019.Day01
 import qualified Year2019.Day04
 import qualified Year2019.Day08
 import qualified Year2024.Day01
+import qualified Year2024.Day02
 
 main :: IO ()
 main = do
@@ -49,5 +50,6 @@ solutionMap =
       ((2019, 1), (Year2019.Day01.part1, Year2019.Day01.part2)),
       ((2019, 4), (Year2019.Day04.part1, Year2019.Day04.part2)),
       ((2019, 8), (Year2019.Day08.part1, Year2019.Day08.part2)),
-      ((2024, 1), (Year2024.Day01.part1, Year2024.Day01.part2))
+      ((2024, 1), (Year2024.Day01.part1, Year2024.Day01.part2)),
+      ((2024, 2), (Year2024.Day02.part1, Year2024.Day02.part2))
     ]
