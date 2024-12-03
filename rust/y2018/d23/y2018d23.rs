@@ -78,7 +78,7 @@ impl FromStr for Bot {
 fn dist(p1: &Coord, p2: &Coord) -> u64 {
     p1.iter()
         .zip(p2.iter())
-        .map(|(a, b)| (a - b).abs() as u64)
+        .map(|(a, b)| (a - b).unsigned_abs() as u64)
         .sum()
 }
 
@@ -105,6 +105,7 @@ impl Bot {
         }
         for i in 0..8 {
             let mut corner = [0; 3];
+            #[allow(clippy::needless_range_loop)]
             for j in 0..3 {
                 // i ~3 bits; the j-th bit of i determines
                 // whether the j-th coordinate is taken from r.0 or r.1
