@@ -1,0 +1,11 @@
+[package]
+name = "y2024d03"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "y2024d03.rs"
+
+[dependencies]
+aoc = "*"
+regex = "1.11.1"

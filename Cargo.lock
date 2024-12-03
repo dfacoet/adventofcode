@@ -111,6 +111,7 @@ dependencies = [
  "y2018d23",
  "y2020d01",
  "y2023d04",
+ "y2024d03",
 ]
 
 [[package]]
@@ -2474,6 +2475,14 @@ name = "y2023d04"
 version = "0.1.0"
 dependencies = [
  "aoc 0.6.1",
+]
+
+[[package]]
+name = "y2024d03"
+version = "0.1.0"
+dependencies = [
+ "aoc 0.6.1",
+ "regex",
 ]
 
 [[package]]
