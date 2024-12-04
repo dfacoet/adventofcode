@@ -6,7 +6,7 @@ part1 :: String -> String
 part1 input = show . length $ filter (\w -> w == "XMAS" || w == "SAMX") (allWords input)
 
 part2 :: String -> String
-part2 = error "Part2 not implemented"
+part2 input = show . length $ filter isXMASBlock (allXBlocks input)
 
 allWords :: String -> [String]
 allWords grid =
@@ -34,3 +34,21 @@ diagWords grid =
 
 antiDiagWords :: [String] -> [String]
 antiDiagWords = diagWords . map reverse
+
+allXBlocks :: String -> [[String]]
+allXBlocks input =
+  let grid = lines input
+   in [ map (take 3 . drop j) $ (take 3 . drop i) grid
+        | i <- [0 .. length grid - 3],
+          j <- [0 .. length (head grid) - 3]
+      ]
+
+isXMASBlock :: [String] -> Bool
+isXMASBlock [[a, _, b], [_, 'A', _], [c, _, d]] = "MMSS" `elem` rotate [a, b, d, c]
+isXMASBlock [_, _, _] = False
+isXMASBlock _ = error "not a block"
+
+rotate :: String -> [String]
+rotate xs = [(take n . drop i) (cycle xs) | i <- [0 .. n - 1]]
+  where
+    n = length xs
