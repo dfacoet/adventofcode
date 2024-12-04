@@ -28,6 +28,7 @@ library
       Year2019.Day08
       Year2024.Day01
       Year2024.Day02
+      Year2024.Day04
   other-modules:
       Paths_haskell
   autogen-modules:
