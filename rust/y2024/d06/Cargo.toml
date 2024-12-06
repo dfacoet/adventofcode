@@ -5,6 +5,3 @@ edition = "2021"
 
 [lib]
 path = "y2024d06.rs"
-
-[dependencies]
-aoc = "*"

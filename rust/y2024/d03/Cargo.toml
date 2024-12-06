@@ -7,5 +7,4 @@ edition = "2021"
 path = "y2024d03.rs"
 
 [dependencies]
-aoc = "*"
 regex = "1.11.1"
