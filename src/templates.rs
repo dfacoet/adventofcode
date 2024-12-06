@@ -20,9 +20,6 @@ edition = \"2021\"
 
 [lib]
 path = \"{name}.rs\"
-
-[dependencies]
-aoc = \"*\"
 "
     )
 }
