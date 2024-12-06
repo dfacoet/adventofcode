@@ -2,27 +2,22 @@ use std::collections::HashSet;
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (guard_pos, obstacles, grid_bounds) = parse_input(input)?;
-
-    run_guard(guard_pos, &obstacles, grid_bounds)
-        .map(|visited| visited.len().to_string())
-        .ok_or_else(|| "Guard is stuck in a loop".into())
+    run_guard(guard_pos, &obstacles, grid_bounds).map(|visited| visited.len().to_string())
 }
 
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (guard_pos, obstacles, grid_bounds) = parse_input(input)?;
     let visited = run_guard(guard_pos, &obstacles, grid_bounds).unwrap();
-    let mut count = 0;
-    for (i, j) in visited {
-        let mut new_obstacles = obstacles.clone();
-        if (i, j) != guard_pos && new_obstacles.insert((i, j)) {
-            match run_guard(guard_pos, &new_obstacles, grid_bounds) {
-                Some(_) => { // guard is not stuck in a loop
-                }
-                None => count += 1,
-            }
-        }
-    }
-    Ok(count.to_string())
+    let n_loops = visited
+        .into_iter()
+        .filter(|p| p != &guard_pos)
+        .filter(|p| {
+            let mut new_obstacles = obstacles.clone();
+            new_obstacles.insert(*p);
+            is_loop(guard_pos, &new_obstacles, grid_bounds)
+        })
+        .count();
+    Ok(n_loops.to_string())
 }
 
 type Coord = (usize, usize);
@@ -74,7 +69,7 @@ fn run_guard(
     initial_pos: Coord,
     obstacles: &HashSet<Coord>,
     grid_bounds: Coord,
-) -> Option<HashSet<Coord>> {
+) -> Result<HashSet<Coord>, Box<dyn std::error::Error>> {
     let mut guard_dir = 0;
     let mut guard_pos = initial_pos;
 
@@ -83,8 +78,23 @@ fn run_guard(
     while let Some((new_pos, new_dir)) = get_next(guard_pos, guard_dir, obstacles, grid_bounds) {
         (guard_pos, guard_dir) = (new_pos, new_dir);
         if !visited.insert((guard_pos, guard_dir)) {
-            return None;
+            return Err("Found a loop".into());
         }
     }
-    Some(visited.iter().map(|(p, _)| *p).collect())
+    Ok(visited.iter().map(|(p, _)| *p).collect())
+}
+
+fn is_loop(initial_pos: Coord, obstacles: &HashSet<Coord>, grid_bounds: Coord) -> bool {
+    let mut guard_dir = 0;
+    let mut guard_pos = initial_pos;
+
+    let mut visited = HashSet::new();
+    visited.insert((guard_pos, guard_dir));
+    while let Some(new_state) = get_next(guard_pos, guard_dir, obstacles, grid_bounds) {
+        (guard_pos, guard_dir) = new_state;
+        if !visited.insert((guard_pos, guard_dir)) {
+            return true;
+        }
+    }
+    false
 }
