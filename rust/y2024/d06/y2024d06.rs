@@ -1,34 +1,28 @@
-use core::panic;
 use std::collections::HashSet;
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (guard_pos, obstacles, grid_bounds) = parse_input(input)?;
 
-    if let Some(n_visited) = run_guard(guard_pos, &obstacles, grid_bounds) {
-        Ok(format!("{}", n_visited))
-    } else {
-        Err("Guard is stuck in a loop".into())
-    }
+    run_guard(guard_pos, &obstacles, grid_bounds)
+        .map(|visited| visited.len().to_string())
+        .ok_or_else(|| "Guard is stuck in a loop".into())
 }
 
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (guard_pos, obstacles, grid_bounds) = parse_input(input)?;
-
+    let visited = run_guard(guard_pos, &obstacles, grid_bounds).unwrap();
     let mut count = 0;
-    for i in 1..grid_bounds.0 {
-        for j in 1..grid_bounds.1 {
-            let mut new_obstacles = obstacles.clone();
-            if (i, j) != guard_pos && new_obstacles.insert((i, j)) {
-                match run_guard(guard_pos, &new_obstacles, grid_bounds) {
-                    Some(_) => { // guard is not stuck in a loop
-                    }
-                    None => count += 1,
+    for (i, j) in visited {
+        let mut new_obstacles = obstacles.clone();
+        if (i, j) != guard_pos && new_obstacles.insert((i, j)) {
+            match run_guard(guard_pos, &new_obstacles, grid_bounds) {
+                Some(_) => { // guard is not stuck in a loop
                 }
+                None => count += 1,
             }
         }
     }
-
-    Ok(format!("{}", count))
+    Ok(count.to_string())
 }
 
 type Coord = (usize, usize);
@@ -76,7 +70,11 @@ fn get_next(pos: Coord, dir: u8, obstacles: &HashSet<Coord>, bounds: Coord) -> O
     }
 }
 
-fn run_guard(initial_pos: Coord, obstacles: &HashSet<Coord>, grid_bounds: Coord) -> Option<usize> {
+fn run_guard(
+    initial_pos: Coord,
+    obstacles: &HashSet<Coord>,
+    grid_bounds: Coord,
+) -> Option<HashSet<Coord>> {
     let mut guard_dir = 0;
     let mut guard_pos = initial_pos;
 
@@ -88,10 +86,5 @@ fn run_guard(initial_pos: Coord, obstacles: &HashSet<Coord>, grid_bounds: Coord)
             return None;
         }
     }
-    let n_visited_cells = visited
-        .iter()
-        .map(|(p, _)| p)
-        .collect::<HashSet<&Coord>>()
-        .len();
-    Some(n_visited_cells)
+    Some(visited.iter().map(|(p, _)| *p).collect())
 }
