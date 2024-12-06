@@ -1,5 +1,5 @@
 [workspace]
-members = ["rust/y2015/d01", "rust/y2018/d23", "rust/y2020/d01", "rust/y2023/d04", "rust/y2024/d03"]
+members = ["rust/y2015/d01", "rust/y2018/d23", "rust/y2020/d01", "rust/y2023/d04", "rust/y2024/d03", "rust/y2024/d06"]
 
 [package]
 name = "aoc"
@@ -19,3 +19,4 @@ y2020d01 = { path = "rust/y2020/d01" }
 y2023d04 = { path = "rust/y2023/d04" }
 y2018d23 = { path = "rust/y2018/d23" }
 y2024d03 = { path = "rust/y2024/d03" }
+y2024d06 = { path = "rust/y2024/d06" }
