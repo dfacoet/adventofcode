@@ -1,6 +1,6 @@
 module Year2024.Day04 (part1, part2) where
 
-import Data.List (transpose)
+import           Data.List (transpose)
 
 part1 :: String -> String
 part1 input = show . length $ filter (\w -> w == "XMAS" || w == "SAMX") (allWords input)

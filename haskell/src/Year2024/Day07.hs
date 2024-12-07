@@ -1,10 +1,15 @@
 module Year2024.Day07 (part1, part2) where
 
 part1 :: String -> String
-part1 input = show . sum . map fst . filter isPossible $ parseInput input
+part1 = solve [(+), (*)]
 
 part2 :: String -> String
-part2 input = show . sum . map fst . filter isPossibleWithConcat $ parseInput input
+part2 = solve [(+), (*), intConcat]
+  where
+    intConcat y z = read (show y ++ show z)
+
+solve :: [Integer -> Integer -> Integer] -> String -> String
+solve ops = show . sum . map fst . filter (isPossible ops) . parseInput
 
 parseInput :: String -> [(Integer, [Integer])]
 parseInput =
@@ -15,18 +20,13 @@ parseInput =
     )
     . lines
 
-isPossible :: (Integer, [Integer]) -> Bool
-isPossible (test, xs) = test `elem` allEvals xs
+isPossible :: [Integer -> Integer -> Integer] -> (Integer, [Integer]) -> Bool
+isPossible ops (test, xs) = test `elem` allEvals ops xs
 
-allEvals :: [Integer] -> [Integer]
-allEvals (x : xs) = foldl (\rs y -> map (+ y) rs ++ map (* y) rs) [x] xs
-allEvals _ = error "expressions need at least two elements"
-
-isPossibleWithConcat :: (Integer, [Integer]) -> Bool
-isPossibleWithConcat (test, xs) = test `elem` allEvalsWithConcat xs
-
-allEvalsWithConcat :: [Integer] -> [Integer]
-allEvalsWithConcat (x : xs) = foldl (\rs y -> map (+ y) rs ++ map (* y) rs ++ map (`intConcat` y) rs) [x] xs
+allEvals :: [Integer -> Integer -> Integer] -> [Integer] -> [Integer]
+allEvals ops (x : xs) = foldl applyOps [x] xs
   where
-    intConcat y z = read (show y ++ show z)
-allEvalsWithConcat _ = error "expressions need at least two elements"
+    -- Applicative equivalent of
+    -- concatMap (\op -> map (`op` y) rs) ops
+    applyOps rs y = liftA2 ($ y) (flip <$> ops) rs
+allEvals _ _ = error "Expressions must have at least two terms"
