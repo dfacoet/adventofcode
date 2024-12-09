@@ -1,6 +1,7 @@
 # User files
 input/*.txt
 answers/*.txt
+examples/*.txt
 
 .token
 
