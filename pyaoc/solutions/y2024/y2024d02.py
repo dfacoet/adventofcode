@@ -13,7 +13,7 @@ def parse_input(input_str: str) -> list[list[int]]:
 
 
 def is_safe(levels) -> bool:
-    diffs = {b - a for a, b in zip(levels, levels[1:])}
+    diffs = {b - a for a, b in zip(levels, levels[1:], strict=False)}
     return diffs.issubset({1, 2, 3}) or diffs.issubset({-1, -2, -3})
 
 

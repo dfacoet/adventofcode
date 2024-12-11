@@ -1,8 +1,8 @@
-from dataclasses import dataclass
 import itertools
 import re
-from typing import Literal
 from collections.abc import Iterable
+from dataclasses import dataclass
+from typing import Literal
 
 
 def part1(input_str: str) -> str:
@@ -10,7 +10,7 @@ def part1(input_str: str) -> str:
     state: State = [Box("off", (-50, 50), (-50, 50), (-50, 50))]
     for i in instructions:
         state = execute(i, state)
-    return str("")
+    return ""
 
 
 def part2(input_str: str) -> str:
@@ -58,9 +58,9 @@ def execute(instruction: Box, state: State) -> State:
 
 def intersect(i: Box, box: Box) -> Iterable[Box]:
     boxes = [box]
-    for dim in "xyz":
+    for _dim in "xyz":
         new_boxes: list[Box] = []
-        for box in boxes:
+        for _box in boxes:
             # compare box.getattr(dim) and i.getattr(dim)
             pass
     return new_boxes

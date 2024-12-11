@@ -1,22 +1,24 @@
-from dataclasses import dataclass
 import operator
-from typing import Callable, Literal
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Literal
+
 import tqdm
 
 
 def part1(input_str: str) -> str:
     instructions = parse_input(input_str)
-    print("# instr:", len(instructions))
+    # print("# instr:", len(instructions))
 
     for n in tqdm.trange(99_999_999_999_999, 11_111_111_111_111, -1, mininterval=1):
         digits = [int(c) for c in str(n)]
         if 0 in digits:
             continue
-        vars = Vars(0, 0, 0, 0)
+        variables = Vars(0, 0, 0, 0)
         for i in instructions:
-            i.apply(vars, digits)
+            i.apply(variables, digits)
         assert not digits
-        if vars.z == 0:
+        if variables.z == 0:
             return str(n)
 
     raise RuntimeError("Solution not found")
@@ -44,7 +46,7 @@ OP_MAP: dict[str, Callable[[int, int], int]] = {
 
 
 class Instruction:
-    def apply(self, vars: Vars, digits: list[int]) -> None: ...
+    def apply(self, variables: Vars, digits: list[int]) -> None: ...
 
     @staticmethod
     def from_str(s: str) -> "Instruction | None":
@@ -62,8 +64,8 @@ class Instruction:
 
 
 class GetDigit(Instruction):
-    def apply(self, vars: Vars, digits: list[int]) -> None:
-        vars.w = digits.pop(0)
+    def apply(self, variables: Vars, digits: list[int]) -> None:
+        variables.w = digits.pop(0)
 
 
 @dataclass(frozen=True)
@@ -72,9 +74,9 @@ class UnOp(Instruction):
     a: Literal["w", "x", "y", "z"]
     b: int
 
-    def apply(self, vars: Vars, _: list[int]) -> None:
-        r = self.op(getattr(vars, self.a), self.b)
-        setattr(vars, self.a, r)
+    def apply(self, variables: Vars, _: list[int]) -> None:
+        r = self.op(getattr(variables, self.a), self.b)
+        setattr(variables, self.a, r)
 
 
 @dataclass(frozen=True)
@@ -83,9 +85,9 @@ class BinOp(Instruction):
     a: Literal["w", "x", "y", "z"]
     b: Literal["w", "x", "y", "z"]
 
-    def apply(self, vars: Vars, _: list[int]) -> None:
-        r = self.op(getattr(vars, self.a), getattr(vars, self.b))
-        setattr(vars, self.a, r)
+    def apply(self, variables: Vars, _: list[int]) -> None:
+        r = self.op(getattr(variables, self.a), getattr(variables, self.b))
+        setattr(variables, self.a, r)
 
 
 def parse_input(input_str: str) -> list[Instruction]:

@@ -1,5 +1,5 @@
-from collections import defaultdict
 import graphlib
+from collections import defaultdict
 
 
 def part1(input_str: str) -> str:
@@ -14,7 +14,7 @@ def part1(input_str: str) -> str:
 def part2(input_str: str) -> str:
     pairs, updates = parse_input(input_str)
     graph = build_graph(pairs)
-    total = sum(map(lambda x: get_middle_sorted(x, graph), updates))
+    total = sum(get_middle_sorted(x, graph) for x in updates)
     return str(total)
 
 

@@ -1,5 +1,5 @@
 import importlib
-from typing import Callable
+from collections.abc import Callable
 
 SolutionFn = Callable[[str], str]
 
@@ -25,7 +25,7 @@ def run_solution(year: int, day: int, input_path: str | None):
     print(f"year {year} day {day:02}")
     print("================")
     try:
-        part1: SolutionFn = getattr(solution_module, "part1")
+        part1: SolutionFn = solution_module.part1
         sol1 = part1(input_string)
     except (AttributeError, NotImplementedError):
         print("Part1 not implemented")
@@ -35,7 +35,7 @@ def run_solution(year: int, day: int, input_path: str | None):
         print(f"Part1: {sol1}")
 
     try:
-        part2: SolutionFn = getattr(solution_module, "part2")
+        part2: SolutionFn = solution_module.part2
         sol2 = part2(input_string)
     except (AttributeError, NotImplementedError):
         print("Part2 not implemented")

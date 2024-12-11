@@ -1,18 +1,17 @@
-from typing import TypeAlias
-from collections import Counter
+# from collections import Counter
 
 
 def part1(input_str: str) -> str:
     scanners = parse_input(input_str)
-    print(Counter(len(s) for s in scanners))
+    # print(Counter(len(s) for s in scanners))
     return str(len(scanners))
 
 
 def part2(input_str: str) -> str:
-    return "ciao"
+    raise NotImplementedError
 
 
-Scanner: TypeAlias = list[tuple[int, int, int]]
+type Scanner = list[tuple[int, int, int]]
 
 
 def parse_input(input_str: str) -> list[Scanner]:
