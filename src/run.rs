@@ -80,6 +80,7 @@ fn get_solution_functions(
         (2024, 10) => Ok((y2024d10::part1, y2024d10::part2)),
         (2024, 11) => Ok((y2024d11::part1, y2024d11::part2)),
         (2024, 12) => Ok((y2024d12::part1, y2024d12::part2)),
+        (2024, 13) => Ok((y2024d13::part1, y2024d13::part2)),
         _ => Err(format!("Solution code not found for {year}/{day}").into()),
     }
 }
