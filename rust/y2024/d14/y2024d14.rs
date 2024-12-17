@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     Ok(input
-        .trim()
         .lines()
         .map(parse_line)
         .map(|(p, v)| evolve(p, v, 100))
@@ -17,9 +16,33 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
         .to_string())
 }
 
-pub fn part2(_input: String) -> Result<String, Box<dyn std::error::Error>> {
-    // Solve part 2
-    Err("Solution not implemented".into())
+pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
+    let mut robots: Vec<_> = input.lines().map(parse_line).collect();
+    let mut min_dist = usize::MAX;
+    let mut solution = None;
+    for t in 0..10_000 {
+        // TODO: max using lcm
+        let sqdst: usize = robots
+            .iter()
+            .flat_map(|(p1, _)| {
+                robots
+                    .iter()
+                    .map(|(p2, _)| (p1.0 - p2.0).pow(2) + (p1.1 - p2.1).pow(2))
+            })
+            .sum();
+        if sqdst < min_dist {
+            min_dist = sqdst;
+            solution = Some(t);
+        }
+        // TODO: modify robots in place
+        robots = robots
+            .iter()
+            .map(|(p, v)| (evolve(*p, *v, 1), *v))
+            .collect();
+    }
+    solution
+        .map(|t| t.to_string())
+        .ok_or("Solution not found".into())
 }
 
 fn parse_line(line: &str) -> ((usize, usize), (i64, i64)) {
