@@ -1,5 +1,5 @@
 [workspace]
-members = ["rust/y2015/d01", "rust/y2018/d23", "rust/y2020/d01", "rust/y2023/d04", "rust/y2024/d03", "rust/y2024/d06", "rust/y2024/d08", "rust/y2024/d09", "rust/y2024/d10", "rust/y2024/d11", "rust/y2024/d12", "rust/y2024/d13", "rust/y2024/d14"]
+members = ["rust/y2015/d01", "rust/y2018/d23", "rust/y2020/d01", "rust/y2023/d04", "rust/y2024/d03", "rust/y2024/d06", "rust/y2024/d08", "rust/y2024/d09", "rust/y2024/d10", "rust/y2024/d11", "rust/y2024/d12", "rust/y2024/d13", "rust/y2024/d14", "rust/y2024/d18"]
 
 [package]
 name = "aoc"
@@ -27,3 +27,4 @@ y2024d11 = { path = "rust/y2024/d11" }
 y2024d12 = { path = "rust/y2024/d12" }
 y2024d13 = { path = "rust/y2024/d13" }
 y2024d14 = { path = "rust/y2024/d14" }
+y2024d18 = { path = "rust/y2024/d18" }
