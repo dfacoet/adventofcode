@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (patterns, designs) = parse_input(input)?;
 
@@ -8,9 +10,15 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
         .to_string())
 }
 
-pub fn part2(_input: String) -> Result<String, Box<dyn std::error::Error>> {
-    // Solve part 2
-    Err("Solution not implemented".into())
+pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
+    let (patterns, designs) = parse_input(input)?;
+
+    let mut counts_table: HashMap<String, usize> = HashMap::from_iter([("".to_string(), 0)]);
+    Ok(designs
+        .iter()
+        .map(|d| count_ways(d, &patterns, &mut counts_table))
+        .sum::<usize>()
+        .to_string())
 }
 
 fn parse_input(input: String) -> Result<(Vec<String>, Vec<String>), Box<dyn std::error::Error>> {
@@ -30,4 +38,25 @@ fn is_possible(design: &str, patterns: &[String]) -> bool {
     patterns.iter().any(|p| {
         design == p || (design.starts_with(p) && is_possible(&design[p.len()..], patterns))
     })
+}
+
+fn count_ways(design: &str, patterns: &[String], table: &mut HashMap<String, usize>) -> usize {
+    if let Some(&count) = table.get(design) {
+        return count;
+    }
+
+    let count = patterns
+        .iter()
+        .map(|p| {
+            if design == p {
+                1
+            } else if design.starts_with(p) {
+                count_ways(&design[p.len()..], patterns, table)
+            } else {
+                0
+            }
+        })
+        .sum();
+    table.insert(design.to_string(), count);
+    count
 }
