@@ -4,29 +4,21 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (start, end, tracks) = parse_input(input)?;
     let path = find_path(&start, &end, &tracks)?; // pos -> time to target
 
-    let saved: Vec<_> = path
-        .iter()
-        .flat_map(|(p, t1)| {
-            neighbors_d(p, 2).filter_map(|n| path.get(&n).map(|t2| t1.checked_sub(t2 + 2)))
-        })
-        .flatten() // unpack Somes, filter out Nones
-        .collect();
-    Ok(saved.iter().filter(|x| **x >= 100).count().to_string())
+    Ok(find_cheats(&path, 2)
+        .filter(|x| *x >= 100)
+        .count()
+        .to_string())
 }
 
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (start, end, tracks) = parse_input(input)?;
-    let path = find_path(&start, &end, &tracks)?; // pos -> time to target
+    let path = find_path(&start, &end, &tracks)?;
 
-    let saved: Vec<_> = path
-        .iter()
-        .flat_map(|(p, t1)| {
-            neighbors_d(p, 20).filter_map(|n| path.get(&n).map(|t2| t1.checked_sub(t2 + 20)))
-        })
-        .flatten()
-        .collect();
-    Ok(saved.iter().filter(|x| **x >= 100).count().to_string())
-} // 9688 is too low
+    Ok(find_cheats(&path, 20)
+        .filter(|x| *x >= 100)
+        .count()
+        .to_string())
+}
 
 type Coord = (usize, usize);
 
@@ -56,15 +48,28 @@ fn find_char(input: &str, needle: char) -> Result<Coord, Box<dyn std::error::Err
         .ok_or(format!("{needle} not found").into())
 }
 
-fn neighbors_d((i, j): &Coord, d: usize) -> impl Iterator<Item = Coord> {
-    [
-        i.checked_sub(d).map(|ni| (ni, *j)),
-        Some((*i, j + d)),
-        Some((i + d, *j)),
-        j.checked_sub(d).map(|nj| (*i, nj)),
-    ]
-    .into_iter()
-    .flatten()
+fn neighbors_d((i, j): &Coord, max_d: usize) -> impl Iterator<Item = (Coord, usize)> + '_ {
+    (2..=max_d).flat_map(move |d| {
+        (0..=d).flat_map(move |di| {
+            let dj = d - di;
+            let ip = i + di;
+            let im = if di > 0 { i.checked_sub(di) } else { None };
+            let jp = j + dj;
+            let jm = if dj > 0 { j.checked_sub(dj) } else { None };
+            [
+                Some((ip, jp)),
+                im.map(|ni| (ni, jp)),
+                jm.map(|nj| (ip, nj)),
+                match (im, jm) {
+                    (Some(ni), Some(nj)) => Some((ni, nj)),
+                    _ => None, // nicer impl. of monadic ops?
+                },
+            ]
+            .into_iter()
+            .flatten()
+            .map(move |n| (n, d))
+        })
+    })
 }
 
 fn find_path(
@@ -99,4 +104,13 @@ fn find_path(
         .enumerate()
         .map(|(t, &p)| (p, t))
         .collect())
+}
+
+fn find_cheats(path: &HashMap<Coord, usize>, max_dist: usize) -> impl Iterator<Item = usize> + '_ {
+    path.iter()
+        .flat_map(move |(p, t1)| {
+            neighbors_d(p, max_dist)
+                .filter_map(move |(n, d)| path.get(&n).map(move |t2| t1.checked_sub(t2 + d)))
+        })
+        .flatten() // unpack Somes, filter out Nones
 }
