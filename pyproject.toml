@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "mypy[install-types]>=1.13.0",
+    "networkx>=3.4.2",
     "pre-commit>=4.0.1",
     "ruff>=0.7.4",
     "tqdm>=4.67.0",
