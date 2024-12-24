@@ -3,30 +3,18 @@ use std::collections::HashMap;
 use std::str::FromStr;
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
-    let (mut values, wires) = parse_input(input);
-
-    let mut output: Vec<_> = wires
-        .keys()
-        .filter_map(|name| {
-            if name.starts_with("z") {
-                Some((name, get_value(name, &mut values, &wires)))
-            } else {
-                None
-            }
-        })
-        .collect();
-    output.sort();
-
-    Ok(output
-        .iter()
-        .enumerate()
-        .map(|(i, (_, v))| 2_u32.pow(i as u32) * *v as u32)
-        .sum::<u32>()
-        .to_string())
+    let (input, wires) = parse_input(input);
+    let output = solve(&input, &wires);
+    Ok(output.to_string())
 }
 
-pub fn part2(_input: String) -> Result<String, Box<dyn std::error::Error>> {
-    // Solve part 2
+pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
+    let (input, wires) = parse_input(input);
+    let output = solve(&input, &wires);
+    let x = get_n('x', &input);
+    let y = get_n('y', &input);
+    println!("x+y={}", x + y);
+    println!("z  ={}", output);
     Err("Solution not implemented".into())
 }
 
@@ -102,4 +90,27 @@ fn get_value(
     );
     values.insert(name.to_string(), v);
     v
+}
+
+fn solve(input: &HashMap<String, bool>, wires: &HashMap<String, Logic>) -> u64 {
+    let mut values = input.clone();
+    wires
+        .keys()
+        .filter(|name| name.starts_with("z"))
+        .for_each(|name| {
+            get_value(name, &mut values, wires);
+        });
+    get_n('z', &values)
+}
+
+fn get_n(prefix: char, values: &HashMap<String, bool>) -> u64 {
+    let mut n: Vec<_> = values
+        .iter()
+        .filter(|(name, _)| name.starts_with(prefix))
+        .collect();
+    n.sort();
+    n.iter()
+        .enumerate()
+        .map(|(i, (_, v))| 2_u64.pow(i as u32) * **v as u64)
+        .sum::<u64>()
 }
