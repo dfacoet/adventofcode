@@ -12,6 +12,7 @@ import qualified Year2024.Day02
 import qualified Year2024.Day04
 import qualified Year2024.Day07
 import qualified Year2024.Day22
+import qualified Year2024.Day25
 
 main :: IO ()
 main = do
@@ -49,13 +50,14 @@ type SolutionFn = String -> String
 solutionMap :: Map.Map (Integer, Integer) (SolutionFn, SolutionFn)
 solutionMap =
   Map.fromList
-    [ ((2015, 1), (Year2015.Day01.part1, Year2015.Day01.part2)),
-      ((2019, 1), (Year2019.Day01.part1, Year2019.Day01.part2)),
-      ((2019, 4), (Year2019.Day04.part1, Year2019.Day04.part2)),
-      ((2019, 8), (Year2019.Day08.part1, Year2019.Day08.part2)),
-      ((2024, 1), (Year2024.Day01.part1, Year2024.Day01.part2)),
-      ((2024, 2), (Year2024.Day02.part1, Year2024.Day02.part2)),
-      ((2024, 4), (Year2024.Day04.part1, Year2024.Day04.part2)),
-      ((2024, 7), (Year2024.Day07.part1, Year2024.Day07.part2)),
-      ((2024, 22), (Year2024.Day22.part1, Year2024.Day22.part2))
+    [ ((2015, 01), (Year2015.Day01.part1, Year2015.Day01.part2)),
+      ((2019, 01), (Year2019.Day01.part1, Year2019.Day01.part2)),
+      ((2019, 04), (Year2019.Day04.part1, Year2019.Day04.part2)),
+      ((2019, 08), (Year2019.Day08.part1, Year2019.Day08.part2)),
+      ((2024, 01), (Year2024.Day01.part1, Year2024.Day01.part2)),
+      ((2024, 02), (Year2024.Day02.part1, Year2024.Day02.part2)),
+      ((2024, 04), (Year2024.Day04.part1, Year2024.Day04.part2)),
+      ((2024, 07), (Year2024.Day07.part1, Year2024.Day07.part2)),
+      ((2024, 22), (Year2024.Day22.part1, Year2024.Day22.part2)),
+      ((2024, 25), (Year2024.Day25.part1, Year2024.Day25.part2))
     ]
