@@ -9,7 +9,7 @@ part1 input =
    in (show . length) $ [() | k <- keys, l <- locks, fits k l]
 
 part2 :: String -> String
-part2 = error "Part2 not implemented"
+part2 _ = "It's Christmas."
 
 parseInput :: String -> ([[Int]], [[Int]])
 parseInput input =
