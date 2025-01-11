@@ -1,0 +1,10 @@
+[package]
+name = "y2024d16"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "y2024d16.rs"
+
+[dependencies]
+strum = "0.26.3"
