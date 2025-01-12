@@ -117,6 +117,7 @@ dependencies = [
  "y2024d14",
  "y2024d15",
  "y2024d16",
+ "y2024d17",
  "y2024d18",
  "y2024d19",
  "y2024d20",
@@ -1857,6 +1858,10 @@ version = "0.1.0"
 dependencies = [
  "strum",
 ]
+
+[[package]]
+name = "y2024d17"
+version = "0.1.0"
 
 [[package]]
 name = "y2024d18"
