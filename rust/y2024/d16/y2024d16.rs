@@ -20,7 +20,7 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
                 let new_cost = cost + weight;
                 if dist
                     .get(&neighbor) // key not present OR condition
-                    .map_or(true, |&current_cost| new_cost < current_cost)
+                    .is_none_or(|&current_cost| new_cost < current_cost)
                 {
                     queue.push((new_cost, neighbor));
                     dist.insert(neighbor, new_cost); // TODO: decrease cost instead of inserting new!

@@ -1,28 +1,78 @@
-use std::collections::HashSet;
-
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
-    let (mut pos, obstacles, mut boxes, moves) = parse_input(input)?;
+    let (mut pos, mut grid, moves) = parse_input(input)?;
+
     for m in moves {
-        let mut c = next(pos, m);
+        let next_pos = m.next(pos);
+        let mut c = next_pos;
         let mut box_to = None;
-        while boxes.contains(&c) {
-            c = next(c, m);
+        while matches!(grid[c.0][c.1], Cell::BoxLeft) {
+            c = m.next(c);
             box_to = Some(c);
         }
-        if !obstacles.contains(&c) {
-            pos = next(pos, m);
-            if let Some(box_to) = box_to {
-                boxes.remove(&pos);
-                boxes.insert(box_to);
+        match grid[c.0][c.1] {
+            Cell::Empty => {
+                grid[pos.0][pos.1] = Cell::Empty;
+                grid[next_pos.0][next_pos.1] = Cell::Robot;
+                pos = next_pos;
+                if let Some(box_to) = box_to {
+                    grid[box_to.0][box_to.1] = Cell::BoxLeft;
+                }
             }
+            Cell::Wall => (), // do nothing
+            _ => return Err("something is wrong".into()),
         }
     }
 
-    Ok(boxes
-        .into_iter()
-        .map(|(i, j)| 100 * i + j)
-        .sum::<usize>()
-        .to_string())
+    Ok(total_gps(&grid).to_string())
+}
+
+enum Cell {
+    Robot,
+    Empty,
+    Wall,
+    BoxLeft,
+    // BoxRight,
+}
+
+impl Cell {
+    fn from_char(c: char) -> Self {
+        match c {
+            '@' => Cell::Robot,
+            '#' => Cell::Wall,
+            'O' => Cell::BoxLeft,
+            '.' => Cell::Empty,
+            _ => panic!("Invalid character in grid"),
+        }
+    }
+}
+
+#[derive(Debug)]
+enum Move {
+    Up,
+    Right,
+    Down,
+    Left,
+}
+
+impl Move {
+    fn from_char(c: char) -> Self {
+        match c {
+            '^' => Move::Up,
+            '>' => Move::Right,
+            'v' => Move::Down,
+            '<' => Move::Left,
+            _ => panic!("Invalid character in moves: {}", c),
+        }
+    }
+
+    fn next(&self, (i, j): Coord) -> Coord {
+        match self {
+            Move::Up => (i - 1, j),
+            Move::Right => (i, j + 1),
+            Move::Down => (i + 1, j),
+            Move::Left => (i, j - 1),
+        }
+    }
 }
 
 pub fn part2(_input: String) -> Result<String, Box<dyn std::error::Error>> {
@@ -31,7 +81,7 @@ pub fn part2(_input: String) -> Result<String, Box<dyn std::error::Error>> {
 }
 
 type Coord = (usize, usize);
-type Input = (Coord, HashSet<Coord>, HashSet<Coord>, Vec<char>);
+type Input = (Coord, Vec<Vec<Cell>>, Vec<Move>);
 
 fn parse_input(input: String) -> Result<Input, Box<dyn std::error::Error>> {
     let v = input.split("\n\n").collect::<Vec<_>>();
@@ -40,38 +90,40 @@ fn parse_input(input: String) -> Result<Input, Box<dyn std::error::Error>> {
     } else {
         return Err("Invalid input".into());
     };
-    let obstacles = get_positions(grid, '#');
-    let boxes = get_positions(grid, 'O');
-    let robot_positions = get_positions(grid, '@');
-    let robot = if robot_positions.len() == 1 {
-        *robot_positions.iter().next().unwrap()
-    } else {
-        return Err("There should be exactly one robot position".into());
-    };
-    let moves: Vec<_> = moves.lines().collect::<String>().chars().collect(); // remove newlines
-    let move_chars: HashSet<_> = "^v<>".chars().collect();
-    if !moves.iter().all(|c| move_chars.contains(c)) {
-        return Err("Invalid character in moves".into());
-    };
-    Ok((robot, obstacles, boxes, moves))
-}
-
-fn get_positions(grid: &str, ch: char) -> HashSet<Coord> {
-    grid.lines()
+    let grid: Vec<Vec<Cell>> = grid
+        .lines()
+        .map(|l| l.chars().map(Cell::from_char).collect())
+        .collect();
+    let moves = moves
+        .lines()
+        .flat_map(|l| l.chars()) // get rid of newlines
+        .map(Move::from_char)
+        .collect();
+    let pos = grid
+        .iter()
         .enumerate()
-        .flat_map(|(i, line)| {
-            line.char_indices()
-                .filter_map(move |(j, c)| if c == ch { Some((i, j)) } else { None })
+        .filter_map(|(r, row)| {
+            row.iter()
+                .enumerate()
+                .filter_map(|(c, cell)| match cell {
+                    Cell::Robot => Some((r, c)),
+                    _ => None,
+                })
+                .next()
         })
-        .collect()
+        .next()
+        .unwrap();
+    Ok((pos, grid, moves))
 }
 
-fn next((i, j): Coord, m: char) -> Coord {
-    match m {
-        '^' => (i - 1, j),
-        '>' => (i, j + 1),
-        'v' => (i + 1, j),
-        '<' => (i, j - 1),
-        _ => panic!("Invalid move"),
-    }
+fn total_gps(grid: &[Vec<Cell>]) -> usize {
+    grid.iter()
+        .enumerate()
+        .flat_map(|(i, row)| {
+            row.iter().enumerate().map(move |(j, cell)| match cell {
+                Cell::BoxLeft => 100 * i + j,
+                _ => 0,
+            })
+        })
+        .sum()
 }
