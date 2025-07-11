@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (mut pos, mut grid, moves) = parse_input(input)?;
 
@@ -26,12 +28,63 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     Ok(total_gps(&grid).to_string())
 }
 
+pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
+    let (mut pos, grid, moves) = parse_input(input)?;
+    let mut grid = expand_grid(&grid);
+
+    for m in moves {
+        let mut moving = true;
+        let mut move_map = HashMap::new();
+        // move_map.insert(pos, (m.next(pos), grid[pos.0][pos.1]));
+        let mut queue = vec![pos];
+
+        while let Some(c) = queue.pop() {
+            let (i, j) = m.next(c);
+            match grid[i][j] {
+                Cell::Robot => panic!("Trying to move into a robot 🤔"),
+                Cell::Empty => (),
+                Cell::Wall => {
+                    moving = false;
+                    break; // would like to use in while condition, but it's unstable
+                }
+                Cell::BoxLeft => {
+                    let right = (i + 1, j);
+                    if !move_map.contains_key(&right) {
+                        queue.push(right);
+                    }
+                }
+                Cell::BoxRight => {
+                    let left = (i - 1, j);
+                    if !move_map.contains_key(&left) {
+                        queue.push(left);
+                    }
+                }
+            }
+            move_map.insert(c, ((i, j), grid[i][j]));
+            queue.push((i, j));
+        }
+
+        if moving {
+            println!("Moving: ");
+            println!("{:?}", move_map);
+            pos = m.next(pos);
+            move_map.keys().for_each(|&(i, j)| grid[i][j] = Cell::Empty);
+            move_map.values().for_each(|&((i, j), c)| {
+                grid[i][j] = c;
+            });
+        }
+    }
+
+    Ok(total_gps(&grid).to_string())
+}
+
+#[derive(Clone, Copy, Debug)]
 enum Cell {
     Robot,
     Empty,
     Wall,
     BoxLeft,
-    // BoxRight,
+    BoxRight,
 }
 
 impl Cell {
@@ -73,11 +126,6 @@ impl Move {
             Move::Left => (i, j - 1),
         }
     }
-}
-
-pub fn part2(_input: String) -> Result<String, Box<dyn std::error::Error>> {
-    // Solve part 2
-    Err("Solution not implemented".into())
 }
 
 type Coord = (usize, usize);
@@ -126,4 +174,20 @@ fn total_gps(grid: &[Vec<Cell>]) -> usize {
             })
         })
         .sum()
+}
+
+fn expand_grid(grid: &[Vec<Cell>]) -> Vec<Vec<Cell>> {
+    grid.iter()
+        .map(|row| {
+            row.iter()
+                .flat_map(|cell| match cell {
+                    Cell::Robot => [Cell::Robot, Cell::Empty],
+                    Cell::Empty => [Cell::Empty, Cell::Empty],
+                    Cell::Wall => [Cell::Wall, Cell::Wall],
+                    Cell::BoxLeft => [Cell::BoxLeft, Cell::BoxRight],
+                    Cell::BoxRight => panic!("Grid is already expanded"),
+                })
+                .collect()
+        })
+        .collect()
 }
