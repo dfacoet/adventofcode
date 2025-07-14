@@ -31,42 +31,40 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (mut pos, grid, moves) = parse_input(input)?;
     let mut grid = expand_grid(&grid);
+    pos.1 *= 2;
 
     for m in moves {
         let mut moving = true;
         let mut move_map = HashMap::new();
-        // move_map.insert(pos, (m.next(pos), grid[pos.0][pos.1]));
         let mut queue = vec![pos];
 
         while let Some(c) = queue.pop() {
             let (i, j) = m.next(c);
+            move_map.insert(c, ((i, j), grid[c.0][c.1]));
             match grid[i][j] {
-                Cell::Robot => panic!("Trying to move into a robot 🤔"),
-                Cell::Empty => (),
+                Cell::Robot => panic!("Trying to move into a robot aat {:?}", (i, j)),
+                Cell::Empty => continue,
                 Cell::Wall => {
                     moving = false;
                     break; // would like to use in while condition, but it's unstable
                 }
                 Cell::BoxLeft => {
-                    let right = (i + 1, j);
+                    let right = (i, j + 1);
                     if !move_map.contains_key(&right) {
                         queue.push(right);
                     }
                 }
                 Cell::BoxRight => {
-                    let left = (i - 1, j);
+                    let left = (i, j - 1);
                     if !move_map.contains_key(&left) {
                         queue.push(left);
                     }
                 }
             }
-            move_map.insert(c, ((i, j), grid[i][j]));
             queue.push((i, j));
         }
 
         if moving {
-            println!("Moving: ");
-            println!("{:?}", move_map);
             pos = m.next(pos);
             move_map.keys().for_each(|&(i, j)| grid[i][j] = Cell::Empty);
             move_map.values().for_each(|&((i, j), c)| {
