@@ -1,43 +1,46 @@
-use std::collections::{BinaryHeap, HashMap, HashSet};
-use strum::{EnumIter, IntoEnumIterator};
+use std::{
+    cmp::{min, Reverse},
+    collections::{BinaryHeap, HashMap, HashSet},
+};
+use strum::EnumIter;
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (start, end, tracks) = parse_input(input)?;
 
-    let mut dist = HashMap::new();
-    let mut queue = BinaryHeap::new();
+    let mut dist = HashMap::new(); // Node -> cost
+    let mut queue = BinaryHeap::new(); // [(Reverse(cost), Node)]
 
     let start_node = Node {
         position: start,
         direction: Direction::East,
     };
+    queue.push((Reverse(0), start_node));
     dist.insert(start_node, 0);
-    queue.push((0, start_node));
+    let mut best = u32::MAX;
 
-    while let Some((cost, node)) = queue.pop() {
+    while let Some((Reverse(cost), node)) = queue.pop() {
+        if cost > best {
+            break;
+        }
+        if node.position == end {
+            best = min(best, cost);
+            continue;
+        }
+
         for (weight, neighbor) in node.neighbors() {
-            if tracks.contains(&neighbor.position) {
+            if dist
+                .get(&neighbor)
+                .is_none_or(|&neighbor_cost| neighbor_cost >= cost)
+                && tracks.contains(&neighbor.position)
+            {
                 let new_cost = cost + weight;
-                if dist
-                    .get(&neighbor) // key not present OR condition
-                    .is_none_or(|&current_cost| new_cost < current_cost)
-                {
-                    queue.push((new_cost, neighbor));
-                    dist.insert(neighbor, new_cost); // TODO: decrease cost instead of inserting new!
-                }
+                queue.push((Reverse(new_cost), neighbor));
+                dist.insert(neighbor, new_cost);
             }
         }
     }
-    Direction::iter()
-        .filter_map(|d| {
-            dist.get(&Node {
-                position: end,
-                direction: d,
-            })
-        })
-        .min()
-        .map(|s| s.to_string())
-        .ok_or("No path found".into())
+
+    Ok(best.to_string())
 }
 
 pub fn part2(_input: String) -> Result<String, Box<dyn std::error::Error>> {
@@ -113,8 +116,8 @@ impl Node {
     fn neighbors(self) -> [(u32, Node); 3] {
         [
             (1, self.move_forward()),
-            (1000, self.turn_left()),
-            (1000, self.turn_right()),
+            (1001, self.turn_left().move_forward()),
+            (1001, self.turn_right().move_forward()),
         ]
     }
 }
