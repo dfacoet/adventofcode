@@ -19,7 +19,7 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let mut best = u32::MAX;
 
     while let Some((Reverse(cost), node)) = queue.pop() {
-        if cost > best {
+        if cost >= best {
             break;
         }
         if node.position == end {
@@ -43,11 +43,49 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     Ok(best.to_string())
 }
 
-pub fn part2(_input: String) -> Result<String, Box<dyn std::error::Error>> {
-    // Solve part 2
-    Err("Solution not implemented".into())
-}
+pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
+    // Same as part1, but keep track of visited in all paths
+    let (start, end, tracks) = parse_input(input)?;
 
+    let mut dist = HashMap::new(); // Node -> cost
+    let mut queue = BinaryHeap::new(); // [(Reverse(cost), Node, [visited])]
+    let mut all_visited = HashSet::new(); // {position}
+
+    let start_node = Node {
+        position: start,
+        direction: Direction::East,
+    };
+    queue.push((Reverse(0), start_node, vec![start]));
+    dist.insert(start_node, 0);
+    let mut best = u32::MAX;
+
+    while let Some((Reverse(cost), node, visited)) = queue.pop() {
+        if cost > best {
+            break;
+        }
+        if node.position == end {
+            best = min(best, cost);
+            all_visited.extend(visited);
+            continue;
+        }
+
+        for (weight, neighbor) in node.neighbors() {
+            if dist
+                .get(&neighbor)
+                .is_none_or(|&neighbor_cost| neighbor_cost >= cost)
+                && tracks.contains(&neighbor.position)
+            {
+                let new_cost = cost + weight;
+                let mut new_visited = visited.clone();
+                new_visited.push(neighbor.position);
+                queue.push((Reverse(new_cost), neighbor, new_visited));
+                dist.insert(neighbor, new_cost);
+            }
+        }
+    }
+
+    Ok(all_visited.len().to_string())
+}
 type Coord = (usize, usize);
 
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, EnumIter)]
