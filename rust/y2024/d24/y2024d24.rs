@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
+use std::hash::Hash;
 use std::str::FromStr;
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
@@ -10,20 +11,78 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
 
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (input, wires) = parse_input(input);
-    let _n_bits = validate_input(&input, &wires)?;
+    let n_bits = validate_input(&input, &wires)?;
 
-    let output = solve(&input, &wires);
-    let x = get_n('x', &input);
-    let y = get_n('y', &input);
-    println!("x+y={:b}", x + y);
-    println!("z  ={:b}", output);
-    let out_bin = format!("{:b}", output);
-    let res = (x + y) ^ output;
-    println!("    {:0width$b}", res, width = out_bin.len());
-    Err("Solution not implemented".into())
+    let mut wrong_outputs: Vec<_> = wires
+        .iter()
+        .filter_map(|(output, logic)| {
+            if output.starts_with("z") && *output != format!("z{n_bits}") && logic.gate != Gate::Xor
+            {
+                println!("Output {} has gate {:?} instead of XOR", output, logic.gate);
+                Some(output.to_string())
+            } else if logic.gate == Gate::Xor && !logic.output.starts_with("z") {
+                let output_wires = find_wires_with_input(&logic.output, &wires);
+                if output_wires.len() != 2 {
+                    println!(
+                        "Output {} of a XOR is not connected to exactly two wires: {:?}",
+                        output, output_wires
+                    );
+                    Some(output.to_string())
+                } else if!(logic.input1.starts_with("x") || logic.input2.starts_with("x")) {
+                    println!("{output} is output of a XOR connected to two gates, but the inputs are not x and y bits");
+                    Some(output.to_string())
+                } else {
+                    None
+                }
+            } else if logic.gate == Gate::And
+                && logic.input1 != "x00"
+                && logic.input2 != "x00"
+            {
+                let output_wires = find_wires_with_input(&logic.output, &wires);
+                if output_wires.len() != 1 {
+                    println!(
+                        "Output {} of a AND is not connected to exactly two wires: {:?}",
+                        output, output_wires
+                    );
+                    Some(output.to_string())
+                } else {
+                    None
+                }
+            } else if logic.gate == Gate::Or && logic.output != format!("z{n_bits}") {
+                let output_wires = find_wires_with_input(&logic.output, &wires);
+                if output_wires.len() != 2 {
+                    println!(
+                        "Output {} of a OR is not connected to exactly two wires: {:?}",
+                        output, output_wires
+                    );
+                    Some(output.to_string())
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    wrong_outputs.sort();
+    Ok(wrong_outputs.join(","))
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+fn find_wires_with_input(input: &str, wires: &HashMap<String, Logic>) -> Vec<String> {
+    wires
+        .iter()
+        .filter_map(|(name, logic)| {
+            if logic.input1 == input || logic.input2 == input {
+                Some(name.clone())
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 enum Gate {
     And,
     Or,
