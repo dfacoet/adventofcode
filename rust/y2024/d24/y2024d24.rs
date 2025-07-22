@@ -16,49 +16,10 @@ pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let mut wrong_outputs: Vec<_> = wires
         .iter()
         .filter_map(|(output, logic)| {
-            if output.starts_with("z") && *output != format!("z{n_bits}") && logic.gate != Gate::Xor
-            {
-                println!("Output {} has gate {:?} instead of XOR", output, logic.gate);
+            // TODO: Build n_output_connections once instead of iterating each time (should bring from O(n^2) to O(n))
+            let n_output_connections = count_output_connections(&logic.output, &wires);
+            if is_wrong_logic(logic, &n_output_connections, &n_bits) {
                 Some(output.to_string())
-            } else if logic.gate == Gate::Xor && !logic.output.starts_with("z") {
-                let output_wires = find_wires_with_input(&logic.output, &wires);
-                if output_wires.len() != 2 {
-                    println!(
-                        "Output {} of a XOR is not connected to exactly two wires: {:?}",
-                        output, output_wires
-                    );
-                    Some(output.to_string())
-                } else if!(logic.input1.starts_with("x") || logic.input2.starts_with("x")) {
-                    println!("{output} is output of a XOR connected to two gates, but the inputs are not x and y bits");
-                    Some(output.to_string())
-                } else {
-                    None
-                }
-            } else if logic.gate == Gate::And
-                && logic.input1 != "x00"
-                && logic.input2 != "x00"
-            {
-                let output_wires = find_wires_with_input(&logic.output, &wires);
-                if output_wires.len() != 1 {
-                    println!(
-                        "Output {} of a AND is not connected to exactly two wires: {:?}",
-                        output, output_wires
-                    );
-                    Some(output.to_string())
-                } else {
-                    None
-                }
-            } else if logic.gate == Gate::Or && logic.output != format!("z{n_bits}") {
-                let output_wires = find_wires_with_input(&logic.output, &wires);
-                if output_wires.len() != 2 {
-                    println!(
-                        "Output {} of a OR is not connected to exactly two wires: {:?}",
-                        output, output_wires
-                    );
-                    Some(output.to_string())
-                } else {
-                    None
-                }
             } else {
                 None
             }
@@ -69,17 +30,23 @@ pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     Ok(wrong_outputs.join(","))
 }
 
-fn find_wires_with_input(input: &str, wires: &HashMap<String, Logic>) -> Vec<String> {
+fn is_wrong_logic(logic: &Logic, n_output_connections: &usize, n_bits: &usize) -> bool {
+    match logic.gate {
+        Gate::Xor => {
+            !logic.output.starts_with("z")
+                && (*n_output_connections != 2
+                    || !(logic.input1.starts_with("x") || logic.input2.starts_with("x")))
+        }
+        Gate::And => logic.input1 != "x00" && logic.input2 != "x00" && *n_output_connections != 1,
+        Gate::Or => logic.output != format!("z{n_bits}") && *n_output_connections != 2,
+    }
+}
+
+fn count_output_connections(output: &str, wires: &HashMap<String, Logic>) -> usize {
     wires
         .iter()
-        .filter_map(|(name, logic)| {
-            if logic.input1 == input || logic.input2 == input {
-                Some(name.clone())
-            } else {
-                None
-            }
-        })
-        .collect()
+        .filter(|(_, logic)| logic.input1 == output || logic.input2 == output)
+        .count()
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
