@@ -1,5 +1,6 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
+use std::hash::Hash;
 use std::str::FromStr;
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
@@ -9,17 +10,91 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
 }
 
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
+    // Not a general solution, but
+    // - assume the correct implementation is a ripple-carry adder
+    // - we only need to find 8 wrong outputs (and don't need to match them)
+    // - assume each swap involves two gates of different kind, so validation
+    //   is done at a local level (checking only the labels and number of connections)
     let (input, wires) = parse_input(input);
-    let output = solve(&input, &wires);
-    let x = get_n('x', &input);
-    let y = get_n('y', &input);
-    println!("x+y={}", x + y);
-    println!("z  ={}", output);
-    Err("Solution not implemented".into())
+    let n_bits = validate_input(&input, &wires)?;
+
+    // TODO: better way to fold and create the new wires map in one go?
+    let output_connection_counts: HashMap<String, usize> =
+        wires.values().fold(HashMap::new(), |mut acc, logic| {
+            *acc.entry(logic.input1.clone()).or_insert(0) += 1; // avoid cloning?
+            *acc.entry(logic.input2.clone()).or_insert(0) += 1;
+            if logic.output.starts_with('z') {
+                *acc.entry(logic.output.clone()).or_insert(0) += 0;
+            }
+            acc
+        });
+    let wires: HashMap<String, (Logic, usize)> = wires // output name -> (Logic, n_output_connections)
+        .into_iter()
+        .map(|(k, v)| {
+            let count = output_connection_counts.get(&k).unwrap();
+            (k, (v, *count))
+        })
+        .collect();
+
+    let mut wrong_outputs: Vec<_> = wires
+        .iter()
+        .filter_map(|(output, (logic, n_output_connections))| {
+            if is_wrong_logic(logic, n_output_connections, &n_bits) {
+                Some(output.to_string())
+            } else {
+                None
+            }
+        })
+        .collect();
+
+    assert_eq!(wrong_outputs.len(), 8);
+    wrong_outputs.sort();
+    Ok(wrong_outputs.join(","))
+}
+
+fn is_wrong_logic(logic: &Logic, n_output_connections: &usize, n_bits: &usize) -> bool {
+    match logic.gate {
+        Gate::Xor => {
+            !logic.output.starts_with("z")
+                && (*n_output_connections != 2
+                    || !(logic.input1.starts_with("x") || logic.input2.starts_with("x")))
+        }
+        Gate::And => logic.input1 != "x00" && logic.input2 != "x00" && *n_output_connections != 1,
+        Gate::Or => logic.output != format!("z{n_bits}") && *n_output_connections != 2,
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+enum Gate {
+    And,
+    Or,
+    Xor,
+}
+
+impl FromStr for Gate {
+    type Err = Box<dyn std::error::Error>;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "AND" => Ok(Gate::And),
+            "OR" => Ok(Gate::Or),
+            "XOR" => Ok(Gate::Xor),
+            _ => Err("Invalid gate type".into()),
+        }
+    }
+}
+
+impl Gate {
+    fn apply(&self, a: bool, b: bool) -> bool {
+        match self {
+            Gate::And => a && b,
+            Gate::Or => a || b,
+            Gate::Xor => a ^ b,
+        }
+    }
 }
 
 struct Logic {
-    gate: fn(bool, bool) -> bool,
+    gate: Gate,
     input1: String,
     input2: String,
     output: String,
@@ -33,12 +108,7 @@ impl FromStr for Logic {
         if parts.len() != 5 {
             return Err("Invalid logic string format".into());
         }
-        let gate = match parts[1] {
-            "AND" => |a, b| a && b,
-            "OR" => |a, b| a || b,
-            "XOR" => |a, b| a ^ b,
-            _ => return Err("Invalid gate type".into()),
-        };
+        let gate = Gate::from_str(parts[1])?;
         let logic = Logic {
             gate,
             input1: parts[0].to_string(),
@@ -84,7 +154,7 @@ fn get_value(
         return *v;
     }
     let w = wires.get(name).unwrap();
-    let v = (w.gate)(
+    let v = w.gate.apply(
         get_value(&w.input1, values, wires),
         get_value(&w.input2, values, wires),
     );
@@ -113,4 +183,39 @@ fn get_n(prefix: char, values: &HashMap<String, bool>) -> u64 {
         .enumerate()
         .map(|(i, (_, v))| 2_u64.pow(i as u32) * **v as u64)
         .sum::<u64>()
+}
+
+fn validate_input(
+    input: &HashMap<String, bool>,
+    wires: &HashMap<String, Logic>,
+) -> Result<usize, Box<dyn std::error::Error>> {
+    let n_bits = input.len() / 2;
+
+    // Check that inputs and output have the expected number of bits and labels
+    let xs: HashSet<_> = input.keys().filter(|s| s.starts_with('x')).collect();
+    let ys: HashSet<_> = input.keys().filter(|s| s.starts_with('y')).collect();
+    let zs: HashSet<_> = wires.keys().filter(|s| s.starts_with('z')).collect();
+    assert_eq!(xs.len(), n_bits);
+    assert_eq!(ys.len(), n_bits);
+    assert_eq!(zs.len(), n_bits + 1); // Output has one extra bit
+    let width = (n_bits - 1).to_string().len();
+    assert!(zs.contains(&format!("z{}", n_bits)));
+    for i in 0..n_bits {
+        assert!(xs.contains(&format!("x{i:0width$}")));
+        assert!(ys.contains(&format!("y{i:0width$}")));
+        assert!(zs.contains(&format!("z{i:0width$}")));
+    }
+
+    // Check that the gates are those expected for a ripple-carry adder with n_bits
+    let gate_counts = wires.values().fold(HashMap::new(), |mut acc, w| {
+        *acc.entry(w.gate).or_insert(0) += 1;
+        acc
+    });
+    // For each bit, we have two AND, two XOR and one OR gate
+    // except for the zero-th bit, which only has one AND and one XOR
+    assert_eq!(gate_counts.get(&Gate::And), Some(&(2 * n_bits - 1)));
+    assert_eq!(gate_counts.get(&Gate::Xor), Some(&(2 * n_bits - 1)));
+    assert_eq!(gate_counts.get(&Gate::Or), Some(&(n_bits - 1)));
+
+    Ok(n_bits)
 }
