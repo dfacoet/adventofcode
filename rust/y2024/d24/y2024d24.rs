@@ -10,15 +10,36 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
 }
 
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
+    // Not a general solution, but
+    // - assume the correct implementation is a ripple-carry adder
+    // - we only need to find 8 wrong outputs (and don't need to match them)
+    // - assume each swap involves two gates of different kind, so validation
+    //   is done at a local level (checking only the labels and number of connections)
     let (input, wires) = parse_input(input);
     let n_bits = validate_input(&input, &wires)?;
 
+    // TODO: better way to fold and create the new wires map in one go?
+    let output_connection_counts: HashMap<String, usize> =
+        wires.values().fold(HashMap::new(), |mut acc, logic| {
+            *acc.entry(logic.input1.clone()).or_insert(0) += 1; // avoid cloning?
+            *acc.entry(logic.input2.clone()).or_insert(0) += 1;
+            if logic.output.starts_with('z') {
+                *acc.entry(logic.output.clone()).or_insert(0) += 0;
+            }
+            acc
+        });
+    let wires: HashMap<String, (Logic, usize)> = wires // output name -> (Logic, n_output_connections)
+        .into_iter()
+        .map(|(k, v)| {
+            let count = output_connection_counts.get(&k).unwrap();
+            (k, (v, *count))
+        })
+        .collect();
+
     let mut wrong_outputs: Vec<_> = wires
         .iter()
-        .filter_map(|(output, logic)| {
-            // TODO: Build n_output_connections once instead of iterating each time (should bring from O(n^2) to O(n))
-            let n_output_connections = count_output_connections(&logic.output, &wires);
-            if is_wrong_logic(logic, &n_output_connections, &n_bits) {
+        .filter_map(|(output, (logic, n_output_connections))| {
+            if is_wrong_logic(logic, n_output_connections, &n_bits) {
                 Some(output.to_string())
             } else {
                 None
@@ -26,6 +47,7 @@ pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
         })
         .collect();
 
+    assert_eq!(wrong_outputs.len(), 8);
     wrong_outputs.sort();
     Ok(wrong_outputs.join(","))
 }
@@ -40,13 +62,6 @@ fn is_wrong_logic(logic: &Logic, n_output_connections: &usize, n_bits: &usize) -
         Gate::And => logic.input1 != "x00" && logic.input2 != "x00" && *n_output_connections != 1,
         Gate::Or => logic.output != format!("z{n_bits}") && *n_output_connections != 2,
     }
-}
-
-fn count_output_connections(output: &str, wires: &HashMap<String, Logic>) -> usize {
-    wires
-        .iter()
-        .filter(|(_, logic)| logic.input1 == output || logic.input2 == output)
-        .count()
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
