@@ -22,21 +22,26 @@ def part2(input_str: str) -> str:
 def solve(input_str: str) -> tuple[int, int]:
     scanners = parse_input(input_str)
 
-    beacons = set(scanners[0])
+    known_beacons = set(scanners[0])
     queue = deque(scanners[1:])
     scanner_coords: list[Coord] = [(0, 0, 0)]
 
+    # Scanners in the queue have unknown coordinates. If overlap is found, remove it
+    # from the queue, and all its beacons become known. Iterate until all beacon and
+    # scanner coordinates are found.
+    # Improvement: keep track of scanners in the last level, and check for overlap
+    # only with them (caching reduces the need for this improvement).
     while queue:
         new_beacons = queue.popleft()
-        match find_overlap(beacons, new_beacons):
+        match find_overlap(known_beacons, new_beacons):
             case AffineTransformation() as t:
-                beacons.update(map(t, new_beacons))
+                known_beacons.update(map(t, new_beacons))
                 scanner_coords.append(t.translation)
             case None:
                 queue.append(new_beacons)
 
     max_dist = max(l1(x, y) for x, y in itertools.combinations(scanner_coords, 2))
-    return len(beacons), max_dist
+    return len(known_beacons), max_dist
 
 
 type Coord = tuple[int, int, int]
@@ -83,11 +88,13 @@ ROTATIONS = [
 ]
 
 
+@cache
 def delta(x: Coord, y: Coord) -> tuple[int, int, int]:
     # return (vector) position difference
     return tuple(i - j for i, j in zip(x, y))  #  type: ignore[return-value]
 
 
+@cache
 def l1(x: Coord, y: Coord) -> int:
     return sum(map(abs, delta(x, y)))
 
