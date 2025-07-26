@@ -14,7 +14,7 @@ dependencies = [
 
 [tool.ruff.lint]
 select = ["A", "B", "C", "E", "F", "FA", "I", "N", "T", "UP"]
-ignore = ["N818"]
+ignore = ["N818", "B905"]
 
 [tool.ruff.lint.per-file-ignores]
 "pyaoc/run.py" = ["T"]
