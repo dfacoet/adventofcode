@@ -2,29 +2,41 @@ import itertools
 from collections import Counter, deque
 from collections.abc import Iterable
 from dataclasses import dataclass
-from functools import reduce
+from functools import cache, reduce
 from operator import mul
 
 
 def part1(input_str: str) -> str:
+    sol, _ = solve(input_str)
+
+    return str(sol)
+
+
+def part2(input_str: str) -> str:
+    _, sol = solve(input_str)
+
+    return str(sol)
+
+
+@cache
+def solve(input_str: str) -> tuple[int, int]:
     scanners = parse_input(input_str)
 
     beacons = set(scanners[0])
     queue = deque(scanners[1:])
+    scanner_coords: list[Coord] = [(0, 0, 0)]
 
     while queue:
         new_beacons = queue.popleft()
         match find_overlap(beacons, new_beacons):
             case AffineTransformation() as t:
                 beacons.update(map(t, new_beacons))
+                scanner_coords.append(t.translation)
             case None:
                 queue.append(new_beacons)
 
-    return str(len(beacons))
-
-
-def part2(input_str: str) -> str:
-    raise NotImplementedError
+    max_dist = max(l1(x, y) for x, y in itertools.combinations(scanner_coords, 2))
+    return len(beacons), max_dist
 
 
 type Coord = tuple[int, int, int]
