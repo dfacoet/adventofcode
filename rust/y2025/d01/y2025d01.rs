@@ -1,100 +1,57 @@
-use std::fmt::Error;
-
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let mut dial = Dial::new();
     for instruction in input.lines() {
-        dial.execute1(instruction)?;
+        dial.rotate(parse_instruction(instruction)?)?;
     }
-    Ok(dial.count.to_string())
+    Ok(dial.count_final.to_string())
 }
 
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let mut dial = Dial::new();
     for instruction in input.lines() {
-        dial.execute2(instruction)?;
+        dial.rotate(parse_instruction(instruction)?)?;
     }
-    Ok(dial.count.to_string())
+    Ok(dial.count_pass.to_string())
 }
 
-// 5784 is not right
-// 5157
+fn parse_instruction(instruction: &str) -> Result<i64, Box<dyn std::error::Error>> {
+    let mut chars = instruction.chars();
+    let sign = match chars.next() {
+        Some('R') => 1,
+        Some('L') => -1,
+        _ => return Err("Invalid instruction".into()),
+    };
+    let amount: i64 = chars.collect::<String>().parse()?;
+    Ok(sign * amount)
+}
 
 struct Dial {
     position: i64,
-    count: usize,
+    count_final: u64,
+    count_pass: u64,
 }
 
 impl Dial {
     fn new() -> Self {
         Dial {
             position: 50,
-            count: 0,
+            count_final: 0,
+            count_pass: 0,
         }
     }
 
-    fn rotate_left1(self: &mut Self, amount: i64) {
-        self.position = (self.position - amount) % 100;
-        if self.position == 0 {
-            self.count += 1
-        }
-    }
-
-    fn rotate_right1(self: &mut Self, amount: i64) {
-        self.position = (self.position + amount) % 100;
-        if self.position == 0 {
-            self.count += 1
-        }
-    }
-
-    fn execute1(self: &mut Self, instruction: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let mut chars = instruction.chars();
-        let first = chars.next().expect("invalid instruction");
-        let amount: i64 = chars.collect::<String>().parse()?;
-        match first {
-            'L' => self.rotate_left1(amount),
-            'R' => self.rotate_right1(amount),
-            _ => return Err("Invalid instruction".into()),
-        }
-        Ok(())
-    }
-
-    fn rotate_left2(self: &mut Self, amount: i64) {
-        let new = self.position - amount;
-        println!(
-            "old {} new {} -> {}",
-            self.position,
-            new,
-            new.rem_euclid(100)
-        );
-        if new < 0 {
-            println!("adding {}", 1 + usize::try_from(-new).unwrap() / 100);
-            self.count += usize::try_from(-new).unwrap() / 100;
-            if self.position > 0 {
-                println!("   +1");
-                self.count += 1
-            }
-        }
-        if new == 0 {
-            println!("ended at 0 - adding 1");
-            self.count += 1;
-        }
-        self.position = new.rem_euclid(100);
-    }
-
-    fn rotate_right2(self: &mut Self, amount: i64) {
+    fn rotate(&mut self, amount: i64) -> Result<(), Box<dyn std::error::Error>> {
         let new = self.position + amount;
-        self.position = new.rem_euclid(100);
-        self.count += new as usize / 100;
-    }
+        self.count_pass += u64::try_from((new / 100).abs())?;
 
-    fn execute2(self: &mut Self, instruction: &str) -> Result<(), Box<dyn std::error::Error>> {
-        let mut chars = instruction.chars();
-        let first = chars.next().expect("invalid instruction");
-        let amount: i64 = chars.collect::<String>().parse()?;
-        match first {
-            'L' => self.rotate_left2(amount),
-            'R' => self.rotate_right2(amount),
-            _ => return Err("Invalid instruction".into()),
+        if new <= 0 && self.position > 0 {
+            // Passed zero turning left
+            self.count_pass += 1;
+        }
+
+        self.position = new.rem_euclid(100);
+        if self.position == 0 {
+            self.count_final += 1
         }
         Ok(())
     }
