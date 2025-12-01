@@ -60,7 +60,7 @@ fn solver(p: &Problem, shift: u64) -> Option<u64> {
     let num2 = d1.0 * target.1 - d1.1 * target.0;
     let den = d2.1 * d1.0 - d2.0 * d1.1;
 
-    if num1 % den == 0 && num2 % den == 0 {
+    if num1.is_multiple_of(den) && num2.is_multiple_of(den) {
         Some(c1 * num1 / den + c2 * num2 / den)
     } else {
         None

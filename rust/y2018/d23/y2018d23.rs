@@ -33,7 +33,7 @@ pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
         let new_regions = split(&region);
         region = *new_regions
             .iter()
-            .max_by_key(|r| (bots.iter().filter(|bot| bot.in_range_region(r)).count()))
+            .max_by_key(|r| bots.iter().filter(|bot| bot.in_range_region(r)).count())
             .ok_or("No regions")?;
     }
 
