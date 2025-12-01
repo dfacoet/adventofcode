@@ -19,7 +19,7 @@ members = [
     "rust/y2024/d19",
     "rust/y2024/d20",
     "rust/y2024/d21",
-    "rust/y2024/d24",
+    "rust/y2024/d24", "rust/y2025/d01",
 ]
 
 [package]
@@ -57,3 +57,4 @@ y2024d21 = { path = "rust/y2024/d21" }
 y2024d24 = { path = "rust/y2024/d24" }
 y2024d16 = { path = "rust/y2024/d16" }
 y2024d17 = { path = "rust/y2024/d17" }
+y2025d01 = { path = "rust/y2025/d01" }
