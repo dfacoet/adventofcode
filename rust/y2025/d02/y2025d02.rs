@@ -38,14 +38,10 @@ fn is_invalid_2(n: &u64) -> bool {
     // iterate over the possible factorizations of number of digits
     // into number of repetitions * number of repeated digits
     let nd = n.ilog10() + 1;
-    for nrep in 2..=nd {
-        if nd.is_multiple_of(nrep) {
-            let nrd = nd / nrep;
-            let ones = (0..nrep).map(|i| 10u64.pow(nrd * i)).sum();
-            if n.is_multiple_of(ones) {
-                return true;
-            }
-        }
-    }
-    false
+    (2..=nd)
+        .filter(|nrep| nd.is_multiple_of(*nrep))
+        .any(|nrep| {
+            let rep_factor = (0..nrep).map(|i| 10u64.pow(nd / nrep * i)).sum();
+            n.is_multiple_of(rep_factor)
+        })
 }
