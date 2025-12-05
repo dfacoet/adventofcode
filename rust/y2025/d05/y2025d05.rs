@@ -12,20 +12,16 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (mut ranges, _) = parse_input(input)?;
     ranges.sort();
-    let mut ranges = ranges.into_iter();
-    let mut tot = 0;
-    let mut current_range = ranges.next().ok_or("No ranges")?;
-
-    for (a, b) in ranges {
-        if in_range(&a, &current_range) {
-            current_range.1 = max(current_range.1, b);
+    let acc = (0, ranges[0]);
+    let (tot, last) = ranges.into_iter().fold(acc, |(tot, current), next| {
+        if in_range(&next.0, &current) {
+            // Next interval intersects the current -> merge them
+            (tot, (current.0, max(next.1, current.1)))
         } else {
-            tot = add(tot, current_range);
-            current_range = (a, b);
+            (add(tot, current), next)
         }
-    }
-    tot = add(tot, current_range);
-    Ok(tot.to_string())
+    });
+    Ok(add(tot, last).to_string())
 }
 
 type Range = (u64, u64);
