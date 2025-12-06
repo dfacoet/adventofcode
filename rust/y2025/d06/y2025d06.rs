@@ -13,22 +13,21 @@ pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
 }
 
 fn parse_input1(input: String) -> Result<Vec<Problem>, Box<dyn std::error::Error>> {
-    let ns = input
-        .lines()
-        .take_while(|s| s.chars().next().is_some_and(|c| c.is_digit(10)))
+    let mut lines = input.lines().rev();
+    let ops = lines
+        .next()
+        .ok_or("Invalid input")?
+        .split_whitespace()
+        .map(Op::from_str)
+        .collect::<Result<Vec<_>, _>>()?;
+    let ns = lines
+        .rev()
+        .take_while(|s| s.chars().next().is_some_and(|c| c.is_ascii_digit()))
         .map(|s| {
             s.split_whitespace()
                 .map(|n| n.parse::<u64>())
                 .collect::<Result<Vec<_>, _>>()
         })
-        .collect::<Result<Vec<_>, _>>()?;
-    let ops = input
-        .trim()
-        .lines()
-        .last()
-        .ok_or("Invalid input")?
-        .split_whitespace()
-        .map(|s| Op::from_str(s))
         .collect::<Result<Vec<_>, _>>()?;
 
     Ok(ops
@@ -42,17 +41,25 @@ fn parse_input1(input: String) -> Result<Vec<Problem>, Box<dyn std::error::Error
 }
 
 fn parse_input2(input: String) -> Result<Vec<Problem>, Box<dyn std::error::Error>> {
-    let rows: Vec<String> = input
-        .lines()
+    let mut lines = input.lines().rev();
+    let ops = lines
+        .next()
+        .ok_or("Invalid input")?
+        .split_whitespace()
+        .map(Op::from_str)
+        .collect::<Result<Vec<_>, _>>()?;
+
+    let rows: Vec<String> = lines
+        .rev()
         .map_while(|s| {
-            if s.chars().next().is_some_and(|c| c.is_digit(10)) {
+            if s.chars().next().is_some_and(|c| c.is_ascii_digit()) {
                 Some(s.to_string())
             } else {
                 None
             }
         })
         .collect();
-    let ns = transpose(rows).fold(vec![vec![]], |mut groups, row| {
+    let ns = transpose_string(rows).fold(vec![vec![]], |mut groups, row| {
         match row.trim().parse::<u64>() {
             Ok(n) => groups.last_mut().unwrap().push(n),
             Err(_) => groups.push(Vec::new()),
@@ -60,23 +67,14 @@ fn parse_input2(input: String) -> Result<Vec<Problem>, Box<dyn std::error::Error
         groups
     });
 
-    let ops = input
-        .trim()
-        .lines()
-        .last()
-        .ok_or("Invalid input")?
-        .split_whitespace()
-        .map(|s| Op::from_str(s))
-        .collect::<Result<Vec<_>, _>>()?;
-
     Ok(ops
         .into_iter()
-        .zip(ns.into_iter())
+        .zip(ns)
         .map(|(op, xs)| Problem { xs, op })
         .collect())
 }
 
-fn transpose(rows: Vec<String>) -> impl Iterator<Item = String> {
+fn transpose_string(rows: Vec<String>) -> impl Iterator<Item = String> {
     let nrows = rows.len();
     let ncols = rows.first().map(|r| r.len()).unwrap_or(0);
 
@@ -89,7 +87,6 @@ fn transpose(rows: Vec<String>) -> impl Iterator<Item = String> {
     })
 }
 
-#[derive(Debug)]
 enum Op {
     Add,
     Mul,
@@ -107,7 +104,6 @@ impl FromStr for Op {
     }
 }
 
-#[derive(Debug)]
 struct Problem {
     xs: Vec<u64>,
     op: Op,
