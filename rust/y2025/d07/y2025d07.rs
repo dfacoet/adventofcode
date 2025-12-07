@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let (start, splitters) = parse_input(input)?;
@@ -17,15 +17,28 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
                 }
             })
             .collect();
-        println!("{:?}", beams);
     }
 
     Ok(count.to_string())
 }
 
-pub fn part2(_input: String) -> Result<String, Box<dyn std::error::Error>> {
-    // Solve part 2
-    Err("Solution not implemented".into())
+pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
+    let (start, splitters) = parse_input(input)?;
+    let mut paths = HashMap::from([(start, 1u64)]); // pos -> # paths
+
+    for row in splitters {
+        paths = paths.iter().fold(HashMap::new(), |mut acc, (&x, np)| {
+            if row.contains(&x) {
+                *acc.entry(x - 1).or_insert(0) += np;
+                *acc.entry(x + 1).or_insert(0) += np;
+            } else {
+                *acc.entry(x).or_insert(0) += np;
+            };
+            acc
+        })
+    }
+
+    Ok(paths.values().sum::<u64>().to_string())
 }
 
 type PositionsByRow = Vec<HashSet<usize>>;
