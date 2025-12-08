@@ -59,18 +59,30 @@ pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
         }
     }
     distances.sort();
+    let mut ids_to_component: HashMap<_, _> = (0..boxes.len()).map(|i| (i, i)).collect();
+    let mut components: HashMap<_, _> = (0..boxes.len()).map(|i| (i, HashSet::from([i]))).collect();
 
-    let connections: HashMap<usize, Vec<usize>> =
-        distances
-            .iter()
-            .fold(HashMap::new(), |mut acc, &(_, i, j)| {
-                acc.entry(i).or_insert(Vec::new()).push(j);
-                acc.entry(j).or_insert(Vec::new()).push(i);
-                acc
-            });
+    for (_, i, j) in distances {
+        let c1_id = *ids_to_component.get(&i).unwrap();
+        let c2_id = *ids_to_component.get(&j).unwrap();
+        if c1_id == c2_id {
+            continue;
+        }
+        let component2 = components.remove(&c2_id).unwrap();
+        for id in component2.iter() {
+            ids_to_component.insert(*id, c1_id);
+        }
+        components
+            .entry(c1_id)
+            .or_insert_with(|| panic!())
+            .extend(component2);
 
-    println!("{}", connections.len());
-    Err("Solution not implemented".into())
+        if components.len() == 1 {
+            return Ok((boxes[i][0] * boxes[j][0]).to_string());
+        }
+    }
+
+    Err("Solution not found".into()) // unreachable
 }
 
 type Coord = [i64; 3];
