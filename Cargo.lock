@@ -133,6 +133,7 @@ dependencies = [
  "y2025d08",
  "y2025d09",
  "y2025d10",
+ "y2025d11",
 ]
 
 [[package]]
@@ -1950,6 +1951,10 @@ version = "0.1.0"
 dependencies = [
  "itertools",
 ]
+
+[[package]]
+name = "y2025d11"
+version = "0.1.0"
 
 [[package]]
 name = "yoke"

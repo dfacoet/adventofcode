@@ -32,7 +32,7 @@ fn parse_input(input: String) -> Result<Vec<Machine>, Box<dyn std::error::Error>
 struct Machine {
     target: Vec<bool>,
     buttons: Vec<Vec<usize>>,
-    joltage: Vec<usize>,
+    _joltage: Vec<usize>,
 }
 
 impl FromStr for Machine {
@@ -67,7 +67,7 @@ impl FromStr for Machine {
         Ok(Self {
             target,
             buttons,
-            joltage,
+            _joltage: joltage,
         })
     }
 }

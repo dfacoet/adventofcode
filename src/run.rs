@@ -100,6 +100,7 @@ fn get_solution_functions(
         (2025, 8) => Ok((y2025d08::part1, y2025d08::part2)),
         (2025, 9) => Ok((y2025d09::part1, y2025d09::part2)),
         (2025, 10) => Ok((y2025d10::part1, y2025d10::part2)),
+        (2025, 11) => Ok((y2025d11::part1, y2025d11::part2)),
         _ => Err(format!("Solution code not found for {year}/{day}").into()),
     }
 }
