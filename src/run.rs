@@ -90,6 +90,18 @@ fn get_solution_functions(
         (2024, 20) => Ok((y2024d20::part1, y2024d20::part2)),
         (2024, 21) => Ok((y2024d21::part1, y2024d21::part2)),
         (2024, 24) => Ok((y2024d24::part1, y2024d24::part2)),
+        (2025, 1) => Ok((y2025d01::part1, y2025d01::part2)),
+        (2025, 2) => Ok((y2025d02::part1, y2025d02::part2)),
+        (2025, 3) => Ok((y2025d03::part1, y2025d03::part2)),
+        (2025, 4) => Ok((y2025d04::part1, y2025d04::part2)),
+        (2025, 5) => Ok((y2025d05::part1, y2025d05::part2)),
+        (2025, 6) => Ok((y2025d06::part1, y2025d06::part2)),
+        (2025, 7) => Ok((y2025d07::part1, y2025d07::part2)),
+        (2025, 8) => Ok((y2025d08::part1, y2025d08::part2)),
+        (2025, 9) => Ok((y2025d09::part1, y2025d09::part2)),
+        (2025, 10) => Ok((y2025d10::part1, y2025d10::part2)),
+        (2025, 11) => Ok((y2025d11::part1, y2025d11::part2)),
+        (2025, 12) => Ok((y2025d12::part1, y2025d12::part2)),
         _ => Err(format!("Solution code not found for {year}/{day}").into()),
     }
 }
