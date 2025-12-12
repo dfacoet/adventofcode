@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use good_lp::{constraint, default_solver, Expression, Solution, SolverModel};
 use itertools::Itertools;
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
@@ -15,7 +16,7 @@ pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
 
 pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
     let machines = parse_input(input)?;
-    let tot: usize = machines
+    let tot: u64 = machines
         .iter()
         .map(|m| m.find_joltage_presses())
         .collect::<Result<Vec<_>, _>>()?
@@ -32,7 +33,7 @@ fn parse_input(input: String) -> Result<Vec<Machine>, Box<dyn std::error::Error>
 struct Machine {
     target: Vec<bool>,
     buttons: Vec<Vec<usize>>,
-    _joltage: Vec<usize>,
+    joltage: Vec<usize>,
 }
 
 impl FromStr for Machine {
@@ -67,7 +68,7 @@ impl FromStr for Machine {
         Ok(Self {
             target,
             buttons,
-            _joltage: joltage,
+            joltage,
         })
     }
 }
@@ -93,7 +94,32 @@ impl Machine {
         Err("Solution not found".into())
     }
 
-    fn find_joltage_presses(&self) -> Result<usize, Box<dyn std::error::Error>> {
-        Err("Solution not found".into())
+    fn find_joltage_presses(&self) -> Result<u64, Box<dyn std::error::Error>> {
+        good_lp::variables! {vars: 0 <= xs[self.buttons.len()] (integer); }
+
+        let objective = xs.iter().sum::<Expression>();
+        let constraints: Vec<_> = self
+            .joltage
+            .iter()
+            .enumerate()
+            .map(|(i, jolt)| {
+                good_lp::constraint!(
+                    self.buttons
+                        .iter()
+                        .zip(xs.iter())
+                        .filter_map(|(b, x)| if b.contains(&i) { Some(*x) } else { None })
+                        .sum::<Expression>()
+                        == *jolt as u32
+                )
+            })
+            .collect();
+
+        let problem = constraints.into_iter().fold(
+            vars.minimise(&objective).using(default_solver), // unconstrained problem, fold to add all constraints
+            |p, c| p.with(c),
+        );
+        let solution = problem.solve()?;
+
+        Ok(solution.eval(objective) as u64)
     }
 }
