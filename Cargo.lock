@@ -134,6 +134,7 @@ dependencies = [
  "y2025d09",
  "y2025d10",
  "y2025d11",
+ "y2025d12",
 ]
 
 [[package]]
@@ -1954,6 +1955,10 @@ dependencies = [
 
 [[package]]
 name = "y2025d11"
+version = "0.1.0"
+
+[[package]]
+name = "y2025d12"
 version = "0.1.0"
 
 [[package]]
