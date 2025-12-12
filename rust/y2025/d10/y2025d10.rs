@@ -31,9 +31,9 @@ fn parse_input(input: String) -> Result<Vec<Machine>, Box<dyn std::error::Error>
 
 #[derive(Debug)]
 struct Machine {
-    target: Vec<bool>,
-    buttons: Vec<Vec<usize>>,
-    joltage: Vec<usize>,
+    target: u16,       // binary representation gives on/off lights
+    buttons: Vec<u16>, // i-th binary digit is 1 iff the button affects the i-th light
+    joltage: Vec<u32>,
 }
 
 impl FromStr for Machine {
@@ -45,17 +45,25 @@ impl FromStr for Machine {
         let target = target_str
             .trim_start_matches('[')
             .trim_end_matches(']')
-            .chars()
-            .map(|c| c == '#')
-            .collect();
+            .char_indices()
+            .filter_map(|(i, c)| {
+                if c == '#' {
+                    Some(2u16.pow(i as u32))
+                } else {
+                    None
+                }
+            })
+            .sum();
         let buttons = button_str
             .split(' ')
-            .map(|s| {
-                s.trim_start_matches('(')
+            .map(|s| -> Result<u16, Self::Err> {
+                let ids = s
+                    .trim_start_matches('(')
                     .trim_end_matches(')')
                     .split(',')
                     .map(str::parse)
-                    .collect::<Result<Vec<_>, _>>()
+                    .collect::<Result<Vec<_>, _>>()?;
+                Ok(ids.into_iter().map(|d| 2u16.pow(d)).sum())
             })
             .collect::<Result<Vec<_>, _>>()?;
         let joltage = joltage_str
@@ -75,16 +83,12 @@ impl FromStr for Machine {
 
 impl Machine {
     fn find_light_presses(&self) -> Result<usize, Box<dyn std::error::Error>> {
+        // Each button is either pressed or not
+        // Iterate over combinations of buttons of increasing length, until one matches the target
         for n in 1..=self.buttons.len() {
             for bs in self.buttons.iter().combinations(n) {
-                let s = bs
-                    .iter()
-                    .fold(vec![false; self.target.len()], |mut acc, b| {
-                        for p in b.iter() {
-                            acc[*p] = !acc[*p];
-                        }
-                        acc
-                    });
+                // xor all pressed buttons
+                let s = bs.iter().fold(0u16, |acc, &b| acc ^ b);
                 if s == self.target {
                     return Ok(n);
                 }
@@ -98,6 +102,7 @@ impl Machine {
         good_lp::variables! {vars: 0 <= xs[self.buttons.len()] (integer); }
 
         let objective = xs.iter().sum::<Expression>();
+
         let constraints: Vec<_> = self
             .joltage
             .iter()
@@ -107,9 +112,9 @@ impl Machine {
                     self.buttons
                         .iter()
                         .zip(xs.iter())
-                        .filter_map(|(b, x)| if b.contains(&i) { Some(*x) } else { None })
+                        .filter_map(|(b, x)| if b & (1 << i) != 0 { Some(*x) } else { None })
                         .sum::<Expression>()
-                        == *jolt as u32
+                        == *jolt
                 )
             })
             .collect();
