@@ -1,36 +1,12 @@
 use std::str::FromStr;
 
 pub fn part1(input: String) -> Result<String, Box<dyn std::error::Error>> {
-    let (shapes, spaces) = parse_input(input)?;
-    println!("{} {}", shapes.len(), spaces.len());
-    println!("{:?}", shapes[0]);
-    println!("{:?}", spaces[0]);
-    Err("Solution not implemented".into())
+    let (areas, spaces) = parse_input(input)?;
+    Ok(spaces.iter().filter(|s| s.fits(&areas)).count().to_string())
 }
 
-pub fn part2(input: String) -> Result<String, Box<dyn std::error::Error>> {
-    // Solve part 2
-    Err("Solution not implemented".into())
-}
-
-#[derive(Debug)]
-struct Shape {
-    grid: [[bool; 3]; 3],
-}
-
-impl Shape {
-    fn from_strs(block: &&[&str]) -> Self {
-        let mut grid = [[false; 3]; 3];
-        for (row_idx, line) in block.iter().skip(1).enumerate() {
-            for (col_idx, ch) in line.chars().enumerate() {
-                if row_idx < 3 && col_idx < 3 {
-                    grid[row_idx][col_idx] = ch == '#';
-                }
-            }
-        }
-
-        Shape { grid }
-    }
+pub fn part2(_input: String) -> Result<String, Box<dyn std::error::Error>> {
+    Ok("Merry Christmas".into())
 }
 
 #[derive(Debug)]
@@ -61,23 +37,44 @@ impl FromStr for Space {
     }
 }
 
-fn parse_input(input: String) -> Result<(Vec<Shape>, Vec<Space>), Box<dyn std::error::Error>> {
+impl Space {
+    fn area(&self) -> usize {
+        self.shape.0 * self.shape.1
+    }
+
+    fn fits(&self, shapes: &[usize; 6]) -> bool {
+        let required_area: usize = shapes
+            .iter()
+            .zip(self.counts.iter())
+            .map(|(s, n)| n * s)
+            .sum();
+        required_area <= self.area()
+    }
+}
+
+fn parse_input(input: String) -> Result<([usize; 6], Vec<Space>), Box<dyn std::error::Error>> {
     let lines = input.trim().lines().collect::<Vec<_>>();
-    let blocks = lines.split(|s| *s == "").collect::<Vec<_>>();
-    let shapes = blocks
+    let blocks = lines.split(|s| s.is_empty()).collect::<Vec<_>>();
+    if blocks.len() != 7 {
+        return Err("Invalid input".into());
+    }
+    let shape_areas = blocks
         .iter()
-        .take_while(|b| {
-            b[0].chars().nth(0).map_or(false, |c| c.is_ascii_digit())
-                && b[0].chars().nth(1) == Some(':')
+        .take(6)
+        .map(|b| {
+            b.iter()
+                .map(|r| r.chars().filter(|c| *c == '#').count())
+                .sum()
         })
-        .map(Shape::from_strs)
-        .collect();
+        .collect::<Vec<_>>()
+        .try_into()
+        .unwrap();
 
     let spaces = blocks
         .last()
         .ok_or("Invalid input")?
-        .into_iter()
-        .map(|s| Space::from_str(*s))
+        .iter()
+        .map(|s| Space::from_str(s))
         .collect::<Result<Vec<_>, _>>()?;
-    Ok((shapes, spaces))
+    Ok((shape_areas, spaces))
 }
