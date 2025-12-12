@@ -7,4 +7,5 @@ edition = "2021"
 path = "y2025d10.rs"
 
 [dependencies]
+good_lp = { version = "1.14.2", features = ["highs"], default-features = false }
 itertools = "0.14.0"
