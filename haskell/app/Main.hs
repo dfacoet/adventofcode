@@ -8,6 +8,7 @@ import qualified Year2019.Day01
 import qualified Year2019.Day02
 import qualified Year2019.Day04
 import qualified Year2019.Day08
+import qualified Year2020.Day01
 import qualified Year2024.Day01
 import qualified Year2024.Day02
 import qualified Year2024.Day04
@@ -56,6 +57,7 @@ solutionMap =
       ((2019, 02), (Year2019.Day02.part1, Year2019.Day02.part2)),
       ((2019, 04), (Year2019.Day04.part1, Year2019.Day04.part2)),
       ((2019, 08), (Year2019.Day08.part1, Year2019.Day08.part2)),
+      ((2020, 01), (Year2020.Day01.part1, Year2020.Day01.part2)),
       ((2024, 01), (Year2024.Day01.part1, Year2024.Day01.part2)),
       ((2024, 02), (Year2024.Day02.part1, Year2024.Day02.part2)),
       ((2024, 04), (Year2024.Day04.part1, Year2024.Day04.part2)),
