@@ -24,6 +24,7 @@ library
       Lib.Counter
       Year2015.Day01
       Year2019.Day01
+      Year2019.Day02
       Year2019.Day04
       Year2019.Day08
       Year2024.Day01
