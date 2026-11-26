@@ -21,6 +21,7 @@ source-repository head
 
 library
   exposed-modules:
+      Lib.Combinations
       Lib.Counter
       Year2015.Day01
       Year2019.Day01

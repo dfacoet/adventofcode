@@ -1,5 +1,7 @@
 module Year2020.Day01 (part1, part2) where
 
+import Lib.Combinations (pairs, triples)
+
 part1 :: String -> String
 part1 input = show (x * y)
     where
@@ -18,11 +20,3 @@ part2 input = show (x * y * z)
 
 parseInput :: String -> [Int]
 parseInput = map read . lines
-
-pairs :: [Int] -> [(Int, Int)]
-pairs (x:ys) = [(x, y) | y <- ys] ++ pairs ys
-pairs [] = []
-
-triples :: [Int] -> [(Int, Int, Int)]
-triples (x:ys) = [(x, y, z) | (y, z) <- pairs ys] ++ triples ys
-triples [] = []
