@@ -10,7 +10,12 @@ part2 :: String -> String
 part2 input = show (100 * noun + verb)
     where
         p = parseInput input
-        (noun, verb) = head [(n, v) | n <- [0..99], v <- [0..99], runProgram p n v == 19690720]
+        (noun, verb) = head
+            [(n, v)
+            | n <- [0..99]
+            , v <- [0..99]
+            , runProgram p n v == 19690720
+            ]
 
 parseInput :: String -> [Int]
 parseInput = map read . splitOn ","
