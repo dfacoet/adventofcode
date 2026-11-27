@@ -38,7 +38,7 @@ pairs _ = []
 
 findGap :: [Int] -> Maybe Int
 findGap = msum . map f . pairs . sort
-    where
-        f (x, y) = case y - x of
-            2 -> Just (x + 1)
-            _ -> Nothing
+  where
+    f (x, y) = case y - x of
+      2 -> Just (x + 1)
+      _ -> Nothing
