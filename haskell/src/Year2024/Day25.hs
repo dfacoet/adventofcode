@@ -1,7 +1,7 @@
 module Year2024.Day25 (part1, part2) where
 
-import           Data.List       (transpose)
-import           Data.List.Split (splitOn)
+import Data.List (transpose)
+import Data.List.Split (splitOn)
 
 part1 :: String -> String
 part1 input =
@@ -21,7 +21,7 @@ parseInput input =
              in case head block of
                   "#####" -> (keys, locks ++ cs)
                   "....." -> (keys ++ cs, locks)
-                  _       -> error "Invalid block"
+                  _ -> error "Invalid block"
         )
         ([], [])
         blocks

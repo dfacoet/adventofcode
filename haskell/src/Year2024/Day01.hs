@@ -1,8 +1,8 @@
 module Year2024.Day01 (part1, part2) where
 
-import           Data.List   (sort)
-import           Data.Map    (findWithDefault)
-import           Lib.Counter (count)
+import Data.List (sort)
+import Data.Map (findWithDefault)
+import Lib.Counter (count)
 
 part1 :: String -> String
 part1 input =
@@ -20,13 +20,12 @@ part2 input = show $ sum $ map (\x -> x * findWithDefault 0 x rightCounts) leftL
     (leftList, rightList) = parseInput input
     rightCounts = count rightList
 
-
 parseInput :: String -> ([Integer], [Integer])
 parseInput input =
   foldr
     ( \s (xs, ys) -> case words s of
         [x, y] -> (read x : xs, read y : ys)
-        _      -> error "invalid line"
+        _ -> error "invalid line"
     )
     ([], [])
     (lines input)

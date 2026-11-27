@@ -1,8 +1,8 @@
 module Year2024.Day22 (part1, part2) where
 
-import           Data.Bits (shiftL, shiftR, xor, (.&.))
-import           Data.List (tails, transpose)
-import qualified Data.Map  as Map
+import Data.Bits (shiftL, shiftR, xor, (.&.))
+import Data.List (tails, transpose)
+import qualified Data.Map as Map
 
 part1 :: String -> String
 part1 = show . sum . map (evolveN 2000 . read) . lines
