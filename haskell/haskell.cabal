@@ -21,12 +21,20 @@ source-repository head
 
 library
   exposed-modules:
+      Lib.Combinations
       Lib.Counter
       Year2015.Day01
       Year2019.Day01
       Year2019.Day02
       Year2019.Day04
       Year2019.Day08
+      Year2020.Day01
+      Year2020.Day02
+      Year2020.Day03
+      Year2020.Day04
+      Year2020.Day05
+      Year2020.Day06
+      Year2020.Day07
       Year2024.Day01
       Year2024.Day02
       Year2024.Day04
