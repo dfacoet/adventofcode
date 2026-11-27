@@ -13,22 +13,15 @@ part2 input =
       )
 
 traverseSlope :: [String] -> Int -> Int -> Int
-traverseSlope slope right 1 =
+traverseSlope slope right down =
   length $
     filter
       (== '#')
-      [row !! (right * k `mod` l) | (k, row) <- zip [0 ..] slope]
+      [row !! (right * k `mod` l) | (k, row) <- zip [0 ..] (every down slope)]
   where
     l = length $ head slope
-traverseSlope slope 1 down =
-  length $
-    filter
-      (== '#')
-      [row !! (k `mod` l) | (k, row) <- zip [0 ..] (every down slope)]
-  where
-    l = length $ head slope
-traverseSlope _ _ _ = error "not implemented"
 
 every :: Int -> [a] -> [a]
+every 1 xs = xs
 every n (x : xs) = x : every n (drop (n - 1) xs)
 every _ [] = []
